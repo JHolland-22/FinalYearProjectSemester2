@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/60b319350528d0740bf229dd001436800f1bd0363b6b947a622c11ca8d79b855.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/ba828c76033ea3834065b619dea9f151efd3626e3debc9eb4995ef181c0441eb.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -44,6 +44,42 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "Poolappclient2D3B8A6A"
+          }
+        ],
+        "/AuthStack/Pool/PostConfirmationCognito": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PoolPostConfirmationCognito095C5D6D"
+          }
+        ],
+        "/AuthStack/StudentGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StudentGroup"
+          }
+        ],
+        "/AuthStack/EducatorGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EducatorGroup"
+          }
+        ],
+        "/AuthStack/PostConfirmationLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PostConfirmationLambdaServiceRole80A1DAC4"
+          }
+        ],
+        "/AuthStack/PostConfirmationLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PostConfirmationLambdaServiceRoleDefaultPolicy5EC3124B"
+          }
+        ],
+        "/AuthStack/PostConfirmationLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PostConfirmationLambdaC4F60401"
           }
         ],
         "/AuthStack/UserPoolId": [

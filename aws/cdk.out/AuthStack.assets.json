@@ -1,16 +1,30 @@
 {
   "version": "48.0.0",
   "files": {
-    "60b319350528d0740bf229dd001436800f1bd0363b6b947a622c11ca8d79b855": {
+    "ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e": {
+      "displayName": "PostConfirmationLambda/Code",
+      "source": {
+        "path": "asset.ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-current_region-50c50421": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e.zip",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "ba828c76033ea3834065b619dea9f151efd3626e3debc9eb4995ef181c0441eb": {
       "displayName": "AuthStack Template",
       "source": {
         "path": "AuthStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-current_region-435945de": {
+        "current_account-current_region-ee2e3e9f": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
-          "objectKey": "60b319350528d0740bf229dd001436800f1bd0363b6b947a622c11ca8d79b855.json",
+          "objectKey": "ba828c76033ea3834065b619dea9f151efd3626e3debc9eb4995ef181c0441eb.json",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
         }
       }

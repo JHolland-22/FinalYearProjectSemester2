@@ -1,6 +1,8 @@
 from aws_cdk import Stack, CfnOutput, RemovalPolicy
 from constructs import Construct
 import aws_cdk.aws_cognito as cognito
+import aws_cdk.aws_lambda as _lambda
+import aws_cdk.aws_iam as iam
 
 class AuthStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
@@ -18,6 +20,40 @@ class AuthStack(Stack):
                 user_password=True,
                 admin_user_password=True
             )
+        )
+
+        cognito.CfnUserPoolGroup(
+            self,
+            "StudentGroup",
+            group_name="Student",
+            user_pool_id=pool.user_pool_id
+        )
+
+        cognito.CfnUserPoolGroup(
+            self,
+            "EducatorGroup",
+            group_name="Educator",
+            user_pool_id=pool.user_pool_id
+        )
+
+        post_confirmation_lambda = _lambda.Function(
+            self,
+            "PostConfirmationLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="index.handler",
+            code=_lambda.Code.from_asset("lambda")
+        )
+
+        post_confirmation_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["cognito-idp:AdminAddUserToGroup"],
+                resources=["*"]
+            )
+        )
+
+        pool.add_trigger(
+            cognito.UserPoolOperation.POST_CONFIRMATION,
+            post_confirmation_lambda
         )
 
         CfnOutput(self, "UserPoolId", value=pool.user_pool_id)

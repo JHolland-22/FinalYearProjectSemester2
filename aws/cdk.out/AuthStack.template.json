@@ -23,6 +23,14 @@
     ],
     "EmailVerificationMessage": "The verification code to your new account is {####}",
     "EmailVerificationSubject": "Verify your new account",
+    "LambdaConfig": {
+     "PostConfirmation": {
+      "Fn::GetAtt": [
+       "PostConfirmationLambdaC4F60401",
+       "Arn"
+      ]
+     }
+    },
     "SmsVerificationMessage": "The verification code to your new account is {####}",
     "UsernameAttributes": [
      "email"
@@ -74,10 +82,143 @@
     "aws:cdk:path": "AuthStack/Pool/app-client/Resource"
    }
   },
+  "PoolPostConfirmationCognito095C5D6D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PostConfirmationLambdaC4F60401",
+      "Arn"
+     ]
+    },
+    "Principal": "cognito-idp.amazonaws.com",
+    "SourceArn": {
+     "Fn::GetAtt": [
+      "PoolD3F588B8",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthStack/Pool/PostConfirmationCognito"
+   }
+  },
+  "StudentGroup": {
+   "Type": "AWS::Cognito::UserPoolGroup",
+   "Properties": {
+    "GroupName": "Student",
+    "UserPoolId": {
+     "Ref": "PoolD3F588B8"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthStack/StudentGroup"
+   }
+  },
+  "EducatorGroup": {
+   "Type": "AWS::Cognito::UserPoolGroup",
+   "Properties": {
+    "GroupName": "Educator",
+    "UserPoolId": {
+     "Ref": "PoolD3F588B8"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthStack/EducatorGroup"
+   }
+  },
+  "PostConfirmationLambdaServiceRole80A1DAC4": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthStack/PostConfirmationLambda/ServiceRole/Resource"
+   }
+  },
+  "PostConfirmationLambdaServiceRoleDefaultPolicy5EC3124B": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "cognito-idp:AdminAddUserToGroup",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PostConfirmationLambdaServiceRoleDefaultPolicy5EC3124B",
+    "Roles": [
+     {
+      "Ref": "PostConfirmationLambdaServiceRole80A1DAC4"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthStack/PostConfirmationLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "PostConfirmationLambdaC4F60401": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "PostConfirmationLambdaServiceRole80A1DAC4",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.9"
+   },
+   "DependsOn": [
+    "PostConfirmationLambdaServiceRoleDefaultPolicy5EC3124B",
+    "PostConfirmationLambdaServiceRole80A1DAC4"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AuthStack/PostConfirmationLambda/Resource",
+    "aws:asset:path": "asset.ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI20zNQTCwv1k1OydbNyUzSqw4uSUzO1gEKxSfnp+dlluTrVYcWpxYF5Ofn6Din5cHZMIZzTmZqXgmyFESkFiTkX1pSUApkBlSWZOTn6RvrGRrqGZooZhVnZuoWleaVZOam6gVBaAAL1Y8TjQAAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2WPQYvCMBCFf4v3dNy2i/dV0KNF8SwxZuvYNCOdCSIh/30TxWVhT+9732MO00DTLuBjpu9cmfNQOTxB3Is2g8rqGA31HoUgHthOHZFTq2//y29YObRe/k7/zWaicEvK6fF01hDz0tlpRGYkr9bBGymQ9ZuTQj1C3JGzRT+zI4fmUeqLkuL2qJmtMHyVyB2WwQxWlpptUk+Z/+nR9+VsG+QWJKnuIRfy8xbqGurP2ZURqyl4wdHC7pU/fxmPWxsBAAA="
    },
    "Metadata": {
     "aws:cdk:path": "AuthStack/CDKMetadata/Default"
