@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+    <h2 class="mb-4">Choose Your Role</h2>
+    <form method="POST">
+        {% if allowed_role == 'Educator' %}
+            <button type="submit" name="role" value="Educator" class="btn btn-outline-info">Educator</button>
+        {% else %}
+            <button type="submit" name="role" value="Student" class="btn btn-outline-info">Student</button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

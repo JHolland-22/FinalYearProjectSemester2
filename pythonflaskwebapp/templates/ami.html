@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-section">
+    <h2 class="border-bottom mb-4">Shared AMIs</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>AMI Name</th>
+                <th>AMI ID</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ami in amis %}
+            <tr>
+                <td>{{ ami.name }}</td>
+                <td>{{ ami.ami_id }}</td>
+                <td>
+                    <button class="btn btn-outline-success" disabled>Create EC2 Instance</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

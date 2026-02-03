@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-section">
+    <h2 class="border-bottom mb-4">Available Labs</h2>
+    <div class="form-group">
+        <label for="category_filter">Filter by Category</label>
+        <select id="category_filter" class="form-control">
+            <option value="">All</option>
+            {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mt-3">
+        <p>No labs available yet.</p>
+    </div>
+</div>
+{% endblock %}

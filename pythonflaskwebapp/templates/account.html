@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <h2 class="account-heading">{{ session.get('role', 'User') }}</h2>
+  <p class="text-secondary">{{ session.get('email', '') }}</p>
+
+  <form method="POST" action="">
+      {{ form.hidden_tag() }}
+      <fieldset class="form-group">
+          <legend class="border-bottom mb-4">Account Info</legend>
+          <div class="form-group">
+              {{ form.username.label(class="form-control-label") }}
+              {{ form.username(class="form-control form-control-lg") }}
+          </div>
+          <div class="form-group">
+              {{ form.email.label(class="form-control-label") }}
+              {{ form.email(class="form-control form-control-lg") }}
+          </div>
+      </fieldset>
+      <div class="form-group">
+          {{ form.submit(class="btn btn-outline-info") }}
+      </div>
+  </form>
+</div>
+{% endblock content %}

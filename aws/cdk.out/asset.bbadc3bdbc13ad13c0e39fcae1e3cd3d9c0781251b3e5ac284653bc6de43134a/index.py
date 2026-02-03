@@ -3,14 +3,8 @@ import boto3
 cognito = boto3.client("cognito-idp")
 
 def handler(event, context):
-    role = event["request"]["userAttributes"].get("custom:role")
-
-    if role == "Student":
-        group_name = "Student"
-    elif role == "Educator":
-        group_name = "Educator"
-    else:
-        raise Exception("Invalid role")
+    email = event["request"]["userAttributes"].get("email", "")
+    group_name = "Student" if email and email[0].isdigit() else "Educator"
 
     cognito.admin_add_user_to_group(
         UserPoolId=event["userPoolId"],
@@ -19,3 +13,4 @@ def handler(event, context):
     )
 
     return event
+

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>About Page</h1>
+    <break></break>
+    <h2> How to use this </h2>
+    <p> Start up both virtual machines using the start button, when finished with virtual machine press the stop button.</p>
+    <break></break>
+    <h2> How to ssh into virtual machine (s)</h2>
+    <p> Kali Linux machine -> ssh -i key-given.pem kali@public-ip-address</p>
+    <p> Windows XP machine -> ssh -i key-given.pem ubuntu@public-ip-address</p>
+    <break></break>
+    <h2> How to test that it is working </h2>
+    <p> Ping Kali Linux public ip in Windows virtual machine and visa versa </p>
+    
+    {% endblock content %}

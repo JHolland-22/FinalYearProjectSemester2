@@ -1,31 +1,33 @@
 {
   "version": "48.0.0",
   "files": {
-    "ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e": {
+    "29e5c41641068a10617720f724a1a8c343b2d10d3bdf7f6318e1954406b30c6f": {
       "displayName": "PostConfirmationLambda/Code",
       "source": {
-        "path": "asset.ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e",
+        "path": "asset.29e5c41641068a10617720f724a1a8c343b2d10d3bdf7f6318e1954406b30c6f",
         "packaging": "zip"
       },
       "destinations": {
-        "current_account-current_region-50c50421": {
-          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
-          "objectKey": "ae652c2fb42fc10107dec1d71f7bebb6266c441b9c873f708eb6c342c278844e.zip",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        "current_account-eu-west-1-ba55e514": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "29e5c41641068a10617720f724a1a8c343b2d10d3bdf7f6318e1954406b30c6f.zip",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
         }
       }
     },
-    "ba828c76033ea3834065b619dea9f151efd3626e3debc9eb4995ef181c0441eb": {
+    "13ef94c8d31ae7fc1eab74d31a047d8a445b11874df56052fec1d4923664c4ea": {
       "displayName": "AuthStack Template",
       "source": {
         "path": "AuthStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-current_region-ee2e3e9f": {
-          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
-          "objectKey": "ba828c76033ea3834065b619dea9f151efd3626e3debc9eb4995ef181c0441eb.json",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        "current_account-eu-west-1-214fb3db": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "13ef94c8d31ae7fc1eab74d31a047d8a445b11874df56052fec1d4923664c4ea.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
         }
       }
     }
