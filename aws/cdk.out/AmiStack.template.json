@@ -1,0 +1,122 @@
+{
+ "Resources": {
+  "FlaskAppRoleB4C7E1A6": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::",
+           {
+            "Ref": "AWS::AccountId"
+           },
+           ":root"
+          ]
+         ]
+        }
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "RoleName": "FlaskAppRole"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AmiStack/FlaskAppRole/Resource"
+   }
+  },
+  "FlaskAppRoleDefaultPolicy2130C42C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ec2:DescribeImages",
+        "ec2:ModifyImageAttribute",
+        "ec2:DescribeSnapshots",
+        "ec2:ModifySnapshotAttribute"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "FlaskAppRoleDefaultPolicy2130C42C",
+    "Roles": [
+     {
+      "Ref": "FlaskAppRoleB4C7E1A6"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AmiStack/FlaskAppRole/DefaultPolicy/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/yWIWQ5AMBBAz+K/HYq4gAMQDiBVxFCtMI004u62r7fEECcZRIE8dq66mWts4axJqpk9q0G5wFlZ3bN8MB9Lq1H5N3+7Xi0crY4uVnoarQkTEAJEGkw7It+cIVx6qH7ekGNZMnEAAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "AmiStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "FlaskAppRoleArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "FlaskAppRoleB4C7E1A6",
+     "Arn"
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

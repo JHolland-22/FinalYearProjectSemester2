@@ -3,22 +3,27 @@
 {% block content %}
 <div class="content-section">
     <h2 class="border-bottom mb-4">Share an AMI</h2>
-    <form method="POST" action="#">
+    <form method="POST" action="{{ url_for('share_ami') }}">
         <div class="form-group">
             <label for="ami_select">Select AMI</label>
             <select id="ami_select" name="ami_select" class="form-control">
+                <option value="" disabled selected>Select an AMI</option>  <!-- Placeholder option -->
                 {% for ami in amis %}
                     <option value="{{ ami.ami_id }}">{{ ami.name }} ({{ ami.ami_id }})</option>
                 {% endfor %}
             </select>
         </div>
+
         <div class="form-group mt-3">
             <label for="aws_accounts">AWS Account IDs to share with (comma separated)</label>
             <input type="text" id="aws_accounts" name="aws_accounts" class="form-control" placeholder="123456789012, 987654321098">
+            <small class="form-text text-muted">Enter one or more AWS account IDs separated by commas</small>
         </div>
+
         <div class="form-group mt-3">
             <button type="submit" class="btn btn-outline-info">Share AMI</button>
         </div>
     </form>
 </div>
 {% endblock %}
+

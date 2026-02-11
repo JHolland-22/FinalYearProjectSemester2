@@ -1,5 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, current_user, logout_user, login_required
+from .aws_utils import list_user_amis_from_session, share_user_ami_from_session
+from botocore.exceptions import ClientError
 import boto3
 import os
 import re
@@ -69,6 +71,11 @@ def stop_ubuntu():
     return redirect(url_for("home"))
 
 
+
+
+
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # Redirect logged-in users to home
@@ -104,6 +111,12 @@ def register():
 
     return render_template("register.html", form=form)
 
+
+
+
+
+
+
 @app.route("/confirm", methods=["GET", "POST"])
 def confirm():
     form = ConfirmForm()
@@ -137,25 +150,16 @@ def confirm():
     return render_template("confirm.html", form=form)
 
 
-@app.route("/choose_role", methods=["GET", "POST"])
+
+
+
+
+@app.route("/choose_role", methods=["GET"])
 def choose_role():
-    email = request.args.get("email")
-    if not email:
-        flash("Email missing", "danger")
-        return redirect(url_for("login"))
+    return render_template("choose_role.html")
 
-    identifier, _, _ = email.partition('@')
-    allowed_role = "Student" if identifier.isdigit() else "Educator"
 
-    if request.method == "POST":
-        selected_role = request.form.get("role")
-        if selected_role != allowed_role:
-            flash("You cannot select this role for your email.", "danger")
-            return redirect(url_for("choose_role", email=email))
-        flash(f"Role {selected_role} confirmed! Please log in.", "success")
-        return redirect(url_for("login"))
 
-    return render_template("choose_role.html", allowed_role=allowed_role, email=email)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -164,6 +168,7 @@ def login():
         return redirect(url_for("home"))
 
     form = LoginForm()
+
     if form.validate_on_submit():
         try:
             cognito_client.initiate_auth(
@@ -174,23 +179,51 @@ def login():
                     "PASSWORD": form.password.data,
                 },
             )
+
+            session.clear()
             session["email"] = form.email.data
             session["role"] = get_user_group(form.email.data)
-            flash("Logged in successfully!", "success")
+
+            role_arn = form.aws_role_arn.data
+            assume_args = {
+                "RoleArn": role_arn,
+                "RoleSessionName": "FlaskAppSession"
+            }
+
+            if form.aws_external_id.data:
+                assume_args["ExternalId"] = form.aws_external_id.data
+
+            sts_client = boto3.client("sts")
+            sts_response = sts_client.assume_role(**assume_args)
+
+            creds = sts_response["Credentials"]
+            session["aws_access_key_id"] = creds["AccessKeyId"]
+            session["aws_secret_access_key"] = creds["SecretAccessKey"]
+            session["aws_session_token"] = creds["SessionToken"]
+
+            flash("Logged in successfully with AWS credentials.", "success")
             return redirect(url_for("home"))
+
         except cognito_client.exceptions.UserNotConfirmedException:
             flash("Account not confirmed", "warning")
         except cognito_client.exceptions.NotAuthorizedException:
             flash("Invalid email or password", "danger")
+        except ClientError as e:
+            flash(e.response["Error"]["Message"], "danger")
 
     return render_template("login.html", form=form)
+
+
 
 
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Logged out.", "info")
-    return redirect(url_for("home"))
+    return redirect(url_for("choose_role"))
+
+
+
+
 
 
 @app.route("/account", methods=["GET", "POST"])
@@ -213,34 +246,82 @@ def account():
     return render_template("account.html", form=form)
 
 
-from flask import render_template
 
-@app.route("/amishare", methods=["GET", "POST"])
-def amishare():
-    fake_amis = [
-        {"ami_id": "ami-0abcd1234efgh5678", "name": "Ubuntu 22.04"},
-        {"ami_id": "ami-1abcd1234efgh5678", "name": "Windows Server 2019"},
-        {"ami_id": "ami-2abcd1234efgh5678", "name": "Amazon Linux 2"}
-    ]
-    return render_template("ami_share.html", amis=fake_amis)
+@app.route("/ami_share", methods=["GET", "POST"])
+def share_ami():
+    aws_access_key_id = session.get("aws_access_key_id")
+    aws_secret_access_key = session.get("aws_secret_access_key")
+    aws_session_token = session.get("aws_session_token")
+
+    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
+        flash("You must log in with AWS credentials first.", "warning")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        ami_id = request.form.get("ami_select")
+        account_ids = request.form.get("aws_accounts").replace(" ", "").split(",")
+        try:
+            share_user_ami_from_session(
+                aws_access_key_id,
+                aws_secret_access_key,
+                aws_session_token,
+                ami_id,
+                account_ids,
+                region="eu-west-1"
+            )
+            flash(f"AMI {ami_id} shared successfully!", "success")
+            return redirect(url_for("ami"))
+        except ClientError as e:
+            flash(f"Error: {e.response['Error']['Message']}", "danger")
+        except Exception as e:
+            flash(f"Error: {str(e)}", "danger")
+            return redirect(url_for("share_ami"))
+
+    amis = list_user_amis_from_session(
+        aws_access_key_id,
+        aws_secret_access_key,
+        aws_session_token
+    )
+    amis_list = [{"ami_id": img["ImageId"], "name": img.get("Name", "Unnamed AMI")} for img in amis]
+
+    return render_template("ami_share.html", amis=amis_list)
+
+
+
 
 @app.route("/ami", methods=["GET"])
 def ami():
-    fake_shared_amis = [
-        {"ami_id": "ami-0abcd1234efgh5678", "name": "Ubuntu 22.04"},
-        {"ami_id": "ami-1abcd1234efgh5678", "name": "Windows Server 2019"}
+    ec2 = boto3.client('ec2', region_name='us-east-1')
+    response = ec2.describe_images(Owners=['self'])
+
+    amis = [
+        {'ami_id': img['ImageId'], 'name': img.get('Name', 'Unnamed AMI')}
+        for img in response['Images']
     ]
-    return render_template("ami.html", amis=fake_shared_amis)
+
+    return render_template("ami.html", amis=amis)
+
+
+
 
 @app.route("/labs", methods=["GET"])
 def labs():
     fake_categories = ["Networking", "Databases", "Security", "Machine Learning"]
     return render_template("labs.html", categories=fake_categories)
 
+
+
+
+
+
 @app.route("/labsupload", methods=["GET", "POST"])
 def lab_upload():
     fake_categories = ["Networking", "Databases", "Security", "Machine Learning"]
     return render_template("labs_upload.html", categories=fake_categories)
+
+
+
+
 
 
 

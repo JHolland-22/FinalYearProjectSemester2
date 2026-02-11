@@ -13,7 +13,7 @@
     {% if title %}
         <title>Final Year Project - {{ title }}</title>
     {% else %}
-        <title>Final Year Project </title>
+        <title>Final Year Project</title>
     {% endif %}
 </head>
 <body>
@@ -31,7 +31,7 @@
 
                         {% if session.get('email') %}
                             <a class="nav-item nav-link" href="/">Home</a>
-                            <a class="nav-item nav-link" href="/amishare">AMI Sharing</a>
+                            <a class="nav-item nav-link" href="/ami_share">AMI Sharing</a>
                             <a class="nav-item nav-link" href="/ami">AMI Available</a>
                             <a class="nav-item nav-link" href="/labs">Labs Available</a>
 
@@ -45,7 +45,7 @@
                             <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
                             <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                         {% else %}
-                            <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+                            <a class="nav-item nav-link" href="{{ url_for('choose_role') }}">Login</a>
                             <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
                         {% endif %}
                     </div>

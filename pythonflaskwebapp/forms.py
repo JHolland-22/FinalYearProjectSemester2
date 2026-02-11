@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 ##from .models import User
 
 class RegistrationForm(FlaskForm):
@@ -52,7 +52,11 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
+    aws_role_arn = StringField('AWS Role ARN', validators=[DataRequired()])
+    aws_external_id = StringField('AWS External ID', validators=[DataRequired()])
+    aws_session_name = StringField('AWS Session Name', validators=[Optional()])
     submit = SubmitField('Login')
+
 
 
 class UpdateAccountForm(FlaskForm):

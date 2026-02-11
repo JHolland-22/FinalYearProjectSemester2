@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "b5813453429709c1a0cffabcff80178197d6f139446818b74bb1932708c244be": {
+      "displayName": "AmiStack Template",
+      "source": {
+        "path": "AmiStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-eu-west-1-5694adbe": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "b5813453429709c1a0cffabcff80178197d6f139446818b74bb1932708c244be.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
