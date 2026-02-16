@@ -35,6 +35,20 @@
             </div>
 
             <div class="form-group">
+                {{ form.class_group.label(class="form-control-label") }}
+                {% if form.class_group.errors %}
+                    {{ form.class_group(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.class_group.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.class_group(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
                 {{ form.password.label(class="form-control-label") }}
                 {% if form.password.errors %}
                     {{ form.password(class="form-control form-control-lg is-invalid") }}
@@ -61,7 +75,6 @@
                     {{ form.confirm_password(class="form-control form-control-lg") }}
                 {% endif %}
             </div>
-
         </fieldset>
         <div class="form-group">
             {{ form.submit(class="btn btn-outline-info") }}

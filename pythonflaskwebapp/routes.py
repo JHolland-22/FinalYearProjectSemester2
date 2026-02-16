@@ -73,9 +73,6 @@ def stop_ubuntu():
 
 
 
-
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # Redirect logged-in users to home
@@ -97,6 +94,7 @@ def register():
                 UserAttributes=[
                     {"Name": "email", "Value": form.email.data},
                     {"Name": "custom:role", "Value": role},
+                    {"Name": "custom:class_group", "Value": form.class_group.data},
                 ],
             )
         except cognito_client.exceptions.UsernameExistsException:

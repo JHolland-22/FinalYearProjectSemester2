@@ -15,7 +15,8 @@ class AuthStack(Stack):
             auto_verify=cognito.AutoVerifiedAttrs(email=True),
             sign_in_aliases=cognito.SignInAliases(email=True),
             custom_attributes={
-                "role": cognito.StringAttribute(min_len=3, max_len=20)
+                "role": cognito.StringAttribute(min_len=3, max_len=20),
+                "class_group": cognito.StringAttribute(min_len=3, max_len=50)
             },
             removal_policy=RemovalPolicy.DESTROY
         )
