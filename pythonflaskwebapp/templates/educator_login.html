@@ -4,7 +4,7 @@
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Login</legend>
+            <legend class="border-bottom mb-4">Educator Login</legend>
 
             {{ form.email.label(class="form-control-label") }}
             {% if form.email.errors %}
@@ -30,18 +30,6 @@
                 {{ form.aws_role_arn(class="form-control form-control-lg") }}
             {% endif %}
 
-            {{ form.aws_external_id.label(class="form-control-label") }}
-            {% if form.aws_external_id.errors %}
-                {{ form.aws_external_id(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">{% for error in form.aws_external_id.errors %}<span>{{ error }}</span>{% endfor %}</div>
-            {% else %}
-                {{ form.aws_external_id(class="form-control form-control-lg") }}
-            {% endif %}
-
-            <div class="form-check">
-                {{ form.remember(class="form-check-input") }}
-                {{ form.remember.label(class="form-check-label") }}
-            </div>
         </fieldset>
 
         <div class="form-group mt-3">

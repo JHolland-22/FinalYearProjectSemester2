@@ -19,6 +19,7 @@ Registration - Flask/Flask-WTF
 
 https://flask-wtf.readthedocs.io/en/stable/
 https://wtforms.readthedocs.io/en/3.0.x/validators/#custom-validators
+https://wtforms.readthedocs.io/en/3.0.x/fields/#wtforms.fields.SelectField
 
 Registration - Python String Handling
 
@@ -53,12 +54,17 @@ https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cogni
 https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html
 https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html
 https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cognito/UserPool.html#lambda-triggers
+https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cognito/CfnUserPoolGroup.html
 
 AWS Cognito User Pools & Groups
 
 https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html
 https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-groups.html
 https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html
+
+AWS Cognito Custom Attributes
+https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cognito/StringAttribute.html
+https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html#user-pool-settings-custom-attributes
 
 Cognito JWT Tokens
 

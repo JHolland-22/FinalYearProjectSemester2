@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Student Login</legend>
+
+            {{ form.email.label(class="form-control-label") }}
+            {% if form.email.errors %}
+                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">{% for error in form.email.errors %}<span>{{ error }}</span>{% endfor %}</div>
+            {% else %}
+                {{ form.email(class="form-control form-control-lg") }}
+            {% endif %}
+
+            {{ form.password.label(class="form-control-label") }}
+            {% if form.password.errors %}
+                {{ form.password(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">{% for error in form.password.errors %}<span>{{ error }}</span>{% endfor %}</div>
+            {% else %}
+                {{ form.password(class="form-control form-control-lg") }}
+            {% endif %}
+
+            {{ form.aws_access_key_id.label(class="form-control-label") }}
+            {% if form.aws_access_key_id.errors %}
+                {{ form.aws_access_key_id(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">{% for error in form.aws_access_key_id.errors %}<span>{{ error }}</span>{% endfor %}</div>
+            {% else %}
+                {{ form.aws_access_key_id(class="form-control form-control-lg") }}
+            {% endif %}
+
+            {{ form.aws_secret_access_key.label(class="form-control-label") }}
+            {% if form.aws_secret_access_key.errors %}
+                {{ form.aws_secret_access_key(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">{% for error in form.aws_secret_access_key.errors %}<span>{{ error }}</span>{% endfor %}</div>
+            {% else %}
+                {{ form.aws_secret_access_key(class="form-control form-control-lg") }}
+            {% endif %}
+
+            {{ form.aws_session_token.label(class="form-control-label") }}
+            {% if form.aws_session_token.errors %}
+                {{ form.aws_session_token(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">{% for error in form.aws_session_token.errors %}<span>{{ error }}</span>{% endfor %}</div>
+            {% else %}
+                {{ form.aws_session_token(class="form-control form-control-lg") }}
+            {% endif %}
+
+        </fieldset>
+
+        <div class="form-group mt-3">
+            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+    </form>
+</div>
+{% endblock content %}

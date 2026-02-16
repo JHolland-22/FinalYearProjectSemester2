@@ -157,11 +157,8 @@ def choose_role():
     return render_template("choose_role.html")
 
 
-
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
+@app.route("/educator_login", methods=["GET", "POST"])
+def educator_login():
     if session.get("email"):
         return redirect(url_for("home"))
 
@@ -180,26 +177,31 @@ def login():
 
             session.clear()
             session["email"] = form.email.data
-            session["role"] = get_user_group(form.email.data)
+            role = get_user_group(form.email.data)
+            session["role"] = role
 
-            role_arn = form.aws_role_arn.data
-            assume_args = {
-                "RoleArn": role_arn,
-                "RoleSessionName": "FlaskAppSession"
-            }
+            # EDUCATOR: Use Role ARN to assume role
+            if form.aws_role_arn.data:
+                try:
+                    sts_client = boto3.client("sts")
+                    sts_response = sts_client.assume_role(
+                        RoleArn=form.aws_role_arn.data,
+                        RoleSessionName="FlaskAppSession"
+                    )
 
-            if form.aws_external_id.data:
-                assume_args["ExternalId"] = form.aws_external_id.data
+                    creds = sts_response["Credentials"]
+                    session["aws_access_key_id"] = creds["AccessKeyId"]
+                    session["aws_secret_access_key"] = creds["SecretAccessKey"]
+                    session["aws_session_token"] = creds["SessionToken"]
 
-            sts_client = boto3.client("sts")
-            sts_response = sts_client.assume_role(**assume_args)
+                    flash("Logged in successfully with AWS credentials.", "success")
+                except ClientError as e:
+                    flash(f"AWS Role Error: {e.response['Error']['Message']}", "danger")
+                    return render_template("educator_login.html", form=form)
+            else:
+                flash("Please enter your AWS Role ARN.", "danger")
+                return render_template("educator_login.html", form=form)
 
-            creds = sts_response["Credentials"]
-            session["aws_access_key_id"] = creds["AccessKeyId"]
-            session["aws_secret_access_key"] = creds["SecretAccessKey"]
-            session["aws_session_token"] = creds["SessionToken"]
-
-            flash("Logged in successfully with AWS credentials.", "success")
             return redirect(url_for("home"))
 
         except cognito_client.exceptions.UserNotConfirmedException:
@@ -209,7 +211,54 @@ def login():
         except ClientError as e:
             flash(e.response["Error"]["Message"], "danger")
 
-    return render_template("login.html", form=form)
+    return render_template("educator_login.html", form=form)
+
+
+
+@app.route("/student_login", methods=["GET", "POST"])
+def student_login():
+    if session.get("email"):
+        return redirect(url_for("home"))
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        try:
+            cognito_client.initiate_auth(
+                ClientId=COGNITO_CLIENT_ID,
+                AuthFlow="USER_PASSWORD_AUTH",
+                AuthParameters={
+                    "USERNAME": form.email.data,
+                    "PASSWORD": form.password.data,
+                },
+            )
+
+            session.clear()
+            session["email"] = form.email.data
+            role = get_user_group(form.email.data)
+            session["role"] = role
+
+            # STUDENT: Use direct AWS Academy credentials
+            if form.aws_access_key_id.data and form.aws_secret_access_key.data and form.aws_session_token.data:
+                session["aws_access_key_id"] = form.aws_access_key_id.data
+                session["aws_secret_access_key"] = form.aws_secret_access_key.data
+                session["aws_session_token"] = form.aws_session_token.data
+
+                flash("Logged in successfully with AWS Academy credentials.", "success")
+            else:
+                flash("Please enter all AWS Academy credentials.", "danger")
+                return render_template("student_login.html", form=form)
+
+            return redirect(url_for("home"))
+
+        except cognito_client.exceptions.UserNotConfirmedException:
+            flash("Account not confirmed", "warning")
+        except cognito_client.exceptions.NotAuthorizedException:
+            flash("Invalid email or password", "danger")
+        except ClientError as e:
+            flash(e.response["Error"]["Message"], "danger")
+
+    return render_template("student_login.html", form=form)
 
 
 
