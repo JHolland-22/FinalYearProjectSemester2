@@ -9,10 +9,6 @@
       <fieldset class="form-group">
           <legend class="border-bottom mb-4">Account Info</legend>
           <div class="form-group">
-              {{ form.username.label(class="form-control-label") }}
-              {{ form.username(class="form-control form-control-lg") }}
-          </div>
-          <div class="form-group">
               {{ form.email.label(class="form-control-label") }}
               {{ form.email(class="form-control form-control-lg") }}
           </div>
@@ -21,5 +17,37 @@
           {{ form.submit(class="btn btn-outline-info") }}
       </div>
   </form>
+
+  <!-- AWS Credentials -->
+  <div class="mt-4">
+      <h3>AWS Credentials</h3>
+      
+      {% if session.role == "Educator" %}
+      <form method="POST" action="{{ url_for('update_aws_credentials') }}">
+          <div class="form-group">
+              <label class="form-control-label" for="aws_role_arn">AWS Role ARN</label>
+              <input class="form-control" id="aws_role_arn" name="aws_role_arn" type="text" placeholder="arn:aws:iam::123456789012:role/YourRole">
+          </div>
+          <button class="btn btn-success" type="submit">Update Role</button>
+      </form>
+      
+      {% elif session.role == "Student" %}
+      <form method="POST" action="{{ url_for('update_aws_credentials') }}">
+          <div class="form-group">
+              <label class="form-control-label" for="aws_access_key_id">Access Key ID</label>
+              <input class="form-control" id="aws_access_key_id" name="aws_access_key_id" type="text">
+          </div>
+          <div class="form-group">
+              <label class="form-control-label" for="aws_secret_access_key">Secret Access Key</label>
+              <input class="form-control" id="aws_secret_access_key" name="aws_secret_access_key" type="password">
+          </div>
+          <div class="form-group">
+              <label class="form-control-label" for="aws_session_token">Session Token</label>
+              <textarea class="form-control" id="aws_session_token" name="aws_session_token" rows="3"></textarea>
+          </div>
+          <button class="btn btn-success" type="submit">Update Credentials</button>
+      </form>
+      {% endif %}
+  </div>
 </div>
 {% endblock content %}

@@ -7,7 +7,7 @@
         <div class="form-group">
             <label for="ami_select">Select AMI</label>
             <select id="ami_select" name="ami_select" class="form-control">
-                <option value="" disabled selected>Select an AMI</option>  <!-- Placeholder option -->
+                <option value="" disabled selected>Select an AMI</option>
                 {% for ami in amis %}
                     <option value="{{ ami.ami_id }}">{{ ami.name }} ({{ ami.ami_id }})</option>
                 {% endfor %}

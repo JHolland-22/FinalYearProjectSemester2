@@ -269,28 +269,65 @@ def logout():
     return redirect(url_for("choose_role"))
 
 
-
-
-
-
 @app.route("/account", methods=["GET", "POST"])
 def account():
     if "email" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("choose_role"))
 
     form = UpdateAccountForm()
 
     if form.validate_on_submit():
-        # Cognito handles users, so we just update session if needed
-        session["role"] = form.username.data  # Example: update role display
         session["email"] = form.email.data
-        flash("Account info updated (session only, Cognito manages backend).", "success")
+        flash("Account updated successfully.", "success")
         return redirect(url_for("account"))
 
-    form.username.data = session.get("role", "")
     form.email.data = session.get("email", "")
-
     return render_template("account.html", form=form)
+
+
+@app.route("/update_aws_credentials", methods=["POST"])
+def update_aws_credentials():
+    if "email" not in session:
+        return redirect(url_for("choose_role"))
+
+    role = session.get("role")
+
+    if role == "Educator":
+        aws_role_arn = request.form.get('aws_role_arn')
+
+        if aws_role_arn:
+            try:
+                sts_client = boto3.client("sts")
+                response = sts_client.assume_role(
+                    RoleArn=aws_role_arn,
+                    RoleSessionName="AppSession"
+                )
+
+                credentials = response["Credentials"]
+                session["aws_access_key_id"] = credentials["AccessKeyId"]
+                session["aws_secret_access_key"] = credentials["SecretAccessKey"]
+                session["aws_session_token"] = credentials["SessionToken"]
+
+                flash("AWS credentials updated.", "success")
+            except ClientError as e:
+                flash("Error updating AWS credentials.", "danger")
+        else:
+            flash("Please enter AWS Role ARN.", "danger")
+
+    elif role == "Student":
+        access_key = request.form.get('aws_access_key_id')
+        secret_key = request.form.get('aws_secret_access_key')
+        session_token = request.form.get('aws_session_token')
+
+        if access_key and secret_key and session_token:
+            session["aws_access_key_id"] = access_key
+            session["aws_secret_access_key"] = secret_key
+            session["aws_session_token"] = session_token
+            flash("AWS credentials updated.", "success")
+        else:
+            flash("Please enter all AWS credentials.", "danger")
+
+    return redirect(url_for("account"))
 
 
 

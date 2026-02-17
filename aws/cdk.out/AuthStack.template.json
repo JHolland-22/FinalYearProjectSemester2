@@ -237,7 +237,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2WPQYvCMBCFf4v3dNy2i/dV0KNF8SwxZuvYNCOdCSIh/30TxWVhT+9732MO00DTLuBjpu9cmfNQOTxB3Is2g8rqGA31HoUgHthOHZFTq2//y29YObRe/k7/zWaicEvK6fF01hDz0tlpRGYkr9bBGymQ9ZuTQj1C3JGzRT+zI4fmUeqLkuL2qJmtMHyVyB2WwQxWlpptUk+Z/+nR9+VsG+QWJKnuIRfy8xbqGurP2ZURqyl4wdHC7pU/fxmPWxsBAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2WPwYoCMRBEv8V7pnUdBK8qrEcHxbPEGMd2MmmZ7iAS8u8misuCp3r1ij70FKb1HCYjfefKnLrK4RHiTrTpVFaHaKj1KARxz3ZoiJxanf0ff2Dl0Hr5P32b9UDhlpTT/fGkIealsUOPzEhe/QZvpEDWH04KdQ9xS84W/cqGHJpHqW9KiuuDZrbCsCiROyyD6awsNdukXjL/06Jvy9kmyC1IUs1DLuTHNfzUMBtdGbEaghfsLWzf+QSAZieTGgEAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "AuthStack/CDKMetadata/Default"

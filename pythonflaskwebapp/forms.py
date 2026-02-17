@@ -62,7 +62,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
 
     # For Educators - Role ARN
-    aws_role_arn = StringField('AWS Role ARN (Educators only)')
+    aws_role_arn = StringField('AWS Role ARN')
 
     # For Students - Direct credentials from AWS Academy
     aws_access_key_id = StringField('AWS Access Key ID')
@@ -74,7 +74,6 @@ class LoginForm(FlaskForm):
 
 
 class UpdateAccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Update')
 
