@@ -20,7 +20,9 @@ Registration - Flask/Flask-WTF
 https://flask-wtf.readthedocs.io/en/stable/
 https://wtforms.readthedocs.io/en/3.0.x/validators/#custom-validators
 https://wtforms.readthedocs.io/en/3.0.x/fields/#wtforms.fields.SelectField
+
 Registration - Python String Handling
+
 https://docs.python.org/3/library/stdtypes.html#str.isdigit
 https://docs.python.org/3/library/stdtypes.html#str.isalpha
 https://docs.python.org/3/library/stdtypes.html#str.endswith
