@@ -20,9 +20,7 @@ Registration - Flask/Flask-WTF
 https://flask-wtf.readthedocs.io/en/stable/
 https://wtforms.readthedocs.io/en/3.0.x/validators/#custom-validators
 https://wtforms.readthedocs.io/en/3.0.x/fields/#wtforms.fields.SelectField
-
 Registration - Python String Handling
-
 https://docs.python.org/3/library/stdtypes.html#str.isdigit
 https://docs.python.org/3/library/stdtypes.html#str.isalpha
 https://docs.python.org/3/library/stdtypes.html#str.endswith
@@ -63,6 +61,7 @@ https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-grou
 https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html
 
 AWS Cognito Custom Attributes
+
 https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cognito/StringAttribute.html
 https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html#user-pool-settings-custom-attributes
 
@@ -81,6 +80,23 @@ Environment Variables
 
 https://flask.palletsprojects.com/en/2.3.x/config/#environment-and-development
 https://docs.python.org/3/library/os.html#os.environ
+
+Flask + Cognito Integration
+
+https://medium.com/@pallavi.ramachandran/aws-cognito-jwt-verification-with-python-7e5e0d8fa4e1
+
+S3 Bucket Setup
+
+https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_s3/Bucket.html
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
+
+File Upload/Download
+
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/generate_presigned_url.html
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
 
 Flask + Cognito Integration
 
