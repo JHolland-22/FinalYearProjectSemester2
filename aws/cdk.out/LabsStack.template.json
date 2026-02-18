@@ -1,0 +1,231 @@
+{
+ "Resources": {
+  "LabsBucketD67DE1A0": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": {
+     "Fn::Join": [
+      "",
+      [
+       "student-labs-",
+       {
+        "Ref": "AWS::AccountId"
+       }
+      ]
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     }
+    ],
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "LabsStack/LabsBucket/Resource"
+   }
+  },
+  "LabsBucketPolicyC80B0977": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "LabsBucketD67DE1A0"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "LabsBucketD67DE1A0",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "LabsBucketD67DE1A0",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LabsStack/LabsBucket/Policy/Resource"
+   }
+  },
+  "LabsBucketAutoDeleteObjectsCustomResourceBE789F57": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "LabsBucketD67DE1A0"
+    }
+   },
+   "DependsOn": [
+    "LabsBucketPolicyC80B0977"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "LabsStack/LabsBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LabsStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-427919793184-us-east-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "LabsBucketD67DE1A0"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LabsStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WNUQ6CMBBEz8J/WZXGxF/hABI8gMGy4gq0pLvVEMLdhWBC/JqZN5lMAok+wT4qPxybqolbusN4ldI0akY31jCmwTQoKnvYn1sldy2ZYcNrnlQWWFxXILvgDS795v+q3Ls3VejTklGdmVHm35psvWwuQfogk8oHeTq703DQcIxeTBT7YIU6hGLVLza0G4nCAAAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LabsStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "BucketName": {
+   "Value": {
+    "Ref": "LabsBucketD67DE1A0"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
