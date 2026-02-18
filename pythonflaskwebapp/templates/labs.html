@@ -5,15 +5,48 @@
     <h2 class="border-bottom mb-4">Available Labs</h2>
     <div class="form-group">
         <label for="category_filter">Filter by Category</label>
-        <select id="category_filter" class="form-control">
+        <select id="category_filter" class="form-control" onchange="filterLabs()">
             <option value="">All</option>
             {% for category in categories %}
                 <option value="{{ category }}">{{ category }}</option>
             {% endfor %}
         </select>
     </div>
-    <div class="mt-3">
-        <p>No labs available yet.</p>
+
+    {% for category in categories %}
+    <div class="category-section mt-4" data-category="{{ category }}">
+        <h3>{{ category }}</h3>
+
+        {% if labs_by_category[category] %}
+            {% for lab in labs_by_category[category] %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>{{ lab.name }}</strong>
+                    <br><small class="text-muted">{{ (lab.size / 1024) | round(1) }} KB</small>
+                </div>
+                <a href="{{ url_for('view_lab', lab_key=lab.key) }}" class="btn btn-primary btn-sm">View</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No labs available</p>
+        {% endif %}
     </div>
+    {% endfor %}
 </div>
+
+<script>
+function filterLabs() {
+    var filter = document.getElementById('category_filter').value;
+    var sections = document.querySelectorAll('.category-section');
+
+    for (var i = 0; i < sections.length; i++) {
+        if (filter == '' || sections[i].getAttribute('data-category') == filter) {
+            sections[i].style.display = 'block';
+        } else {
+            sections[i].style.display = 'none';
+        }
+    }
+}
+</script>
+
 {% endblock %}

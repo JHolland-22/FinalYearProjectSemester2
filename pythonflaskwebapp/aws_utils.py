@@ -1,4 +1,6 @@
 import boto3
+from flask import session
+
 
 def ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region="eu-west-1"):
     return boto3.client(
@@ -36,3 +38,15 @@ def share_user_ami_from_session(aws_access_key_id, aws_secret_access_key, aws_se
                 OperationType="add",
                 UserIds=target_account_ids
             )
+
+
+def get_s3_client():
+    if session.get('aws_access_key_id'):
+        return boto3.client(
+            's3',
+            aws_access_key_id=session.get('aws_access_key_id'),
+            aws_secret_access_key=session.get('aws_secret_access_key'),
+            aws_session_token=session.get('aws_session_token')
+        )
+    else:
+        return boto3.client('s3')

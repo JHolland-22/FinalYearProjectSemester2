@@ -115,6 +115,102 @@
       },
       "displayName": "AuthStack"
     },
+    "LabsStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "LabsStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "LabsStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://427919793184/us-east-1",
+      "properties": {
+        "templateFile": "LabsStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-deploy-role-427919793184-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-cfn-exec-role-427919793184-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/e4c4f616d469ad44acd16b5b0094a53aab9ab1e76bd9b822c80615da6edf6b0f.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "LabsStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-lookup-role-427919793184-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "LabsStack.assets"
+      ],
+      "metadata": {
+        "/LabsStack/LabsBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LabsBucketD67DE1A0"
+          }
+        ],
+        "/LabsStack/LabsBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LabsBucketPolicyC80B0977"
+          }
+        ],
+        "/LabsStack/LabsBucket/AutoDeleteObjectsCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LabsBucketAutoDeleteObjectsCustomResourceBE789F57"
+          }
+        ],
+        "/LabsStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+            "data": true
+          }
+        ],
+        "/LabsStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+          }
+        ],
+        "/LabsStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+          }
+        ],
+        "/LabsStack/BucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BucketName"
+          }
+        ],
+        "/LabsStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/LabsStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/LabsStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "LabsStack"
+    },
     "Tree": {
       "type": "cdk:tree",
       "properties": {

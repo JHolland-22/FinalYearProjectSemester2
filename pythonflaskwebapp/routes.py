@@ -1,6 +1,8 @@
 from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, current_user, logout_user, login_required
-from .aws_utils import list_user_amis_from_session, share_user_ami_from_session
+from werkzeug.utils import secure_filename
+
+from .aws_utils import list_user_amis_from_session, share_user_ami_from_session, get_s3_client
 from botocore.exceptions import ClientError
 import boto3
 import os
@@ -18,9 +20,10 @@ from .forms import (
 AWS_REGION = os.environ.get("AWS_REGION")
 COGNITO_CLIENT_ID = os.environ.get("COGNITO_CLIENT_ID")
 COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID")
-
+LABS_BUCKET = os.environ.get('LABS_BUCKET_NAME')
 cognito_client = boto3.client("cognito-idp", region_name=AWS_REGION)
 ec2 = boto3.client("ec2", region_name="eu-west-1")
+
 
 
 def get_instance_id_by_name(name):
@@ -114,7 +117,6 @@ def register():
 
 
 
-
 @app.route("/confirm", methods=["GET", "POST"])
 def confirm():
     form = ConfirmForm()
@@ -151,10 +153,10 @@ def confirm():
 
 
 
-
 @app.route("/choose_role", methods=["GET"])
 def choose_role():
     return render_template("choose_role.html")
+
 
 
 @app.route("/educator_login", methods=["GET", "POST"])
@@ -372,7 +374,6 @@ def share_ami():
 
 
 
-
 @app.route("/ami", methods=["GET"])
 def ami():
     ec2 = boto3.client('ec2', region_name='us-east-1')
@@ -388,24 +389,87 @@ def ami():
 
 
 
-@app.route("/labs", methods=["GET"])
+
+@app.route("/labs")
 def labs():
-    fake_categories = ["Networking", "Databases", "Security", "Machine Learning"]
-    return render_template("labs.html", categories=fake_categories)
+    categories = ["Networking", "Databases", "Security", "Machine Learning"]
+    labs_by_category = {}
 
+    try:
+        s3 = get_s3_client()
 
+        for category in categories:
+            response = s3.list_objects_v2(Bucket=LABS_BUCKET, Prefix=f"{category}/")
 
+            labs = []
+            if 'Contents' in response:
+                for obj in response['Contents']:
+                    if not obj['Key'].endswith('/'):
+                        name = obj['Key'].split('/')[-1]
+                        labs.append({
+                            'name': name,
+                            'key': obj['Key'],
+                            'size': obj['Size']
+                        })
+
+            labs_by_category[category] = labs
+
+    except ClientError:
+        flash("Could not load labs", "danger")
+        labs_by_category = {}
+
+    return render_template("labs.html", categories=categories, labs_by_category=labs_by_category)
 
 
 
 @app.route("/labsupload", methods=["GET", "POST"])
 def lab_upload():
-    fake_categories = ["Networking", "Databases", "Security", "Machine Learning"]
-    return render_template("labs_upload.html", categories=fake_categories)
+    categories = ["Networking", "Databases", "Security", "Machine Learning"]
+
+    if request.method == "POST":
+        file = request.files.get('lab_file')
+        category = request.form.get('category_select')
+
+        if not file or file.filename == '':
+            flash("Please select a file", "danger")
+            return redirect(request.url)
+
+        if file and category:
+            try:
+                filename = secure_filename(file.filename)
+                key = f"{category}/{filename}"
+
+                s3 = get_s3_client()
+                s3.upload_fileobj(file, LABS_BUCKET, key)
+
+                flash("Lab uploaded successfully", "success")
+                return redirect(url_for('labs'))
+
+            except ClientError:
+                flash("Upload failed", "danger")
+
+    return render_template("labs_upload.html", categories=categories)
 
 
 
-
+@app.route("/view/<path:lab_key>")
+def view_lab(lab_key):
+    try:
+        s3 = get_s3_client()
+        url = s3.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': LABS_BUCKET,
+                'Key': lab_key,
+                'ResponseContentDisposition': 'inline',  # This makes it open in browser
+                'ResponseContentType': 'application/pdf'  # This tells browser it's a PDF
+            },
+            ExpiresIn=3600
+        )
+        return redirect(url)
+    except ClientError:
+        flash("Can't view that file", "danger")
+        return redirect(url_for('labs'))
 
 
 
