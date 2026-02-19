@@ -4,7 +4,8 @@ https://www.youtube.com/watch?v=45P3xQPaYxc https://www.youtube.com/watch?v=MwZw
 
 https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html#boto3.client https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2/client/describe_instances.html https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-lifecycle.html https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Reservation.html https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Instance.html https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceState.html https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2/client/start_instances.html https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2/client/stop_instances.html https://flask.palletsprojects.com/en/latest/quickstart/#routing
 
-## References for semester 2 
+## References for semester 2
+
 Design
 
 https://flask.palletsprojects.com/en/stable/tutorial/templates/
@@ -63,6 +64,7 @@ https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-grou
 https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html
 
 AWS Cognito Custom Attributes
+
 https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cognito/StringAttribute.html
 https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html#user-pool-settings-custom-attributes
 
@@ -85,3 +87,39 @@ https://docs.python.org/3/library/os.html#os.environ
 Flask + Cognito Integration
 
 https://medium.com/@pallavi.ramachandran/aws-cognito-jwt-verification-with-python-7e5e0d8fa4e1
+
+S3 Bucket Setup
+
+https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_s3/Bucket.html
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
+
+File Upload/Download
+
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/generate_presigned_url.html
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html
+https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
+
+S3 Delete Operations
+
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/delete_object.html
+
+Launch Templates & EC2 Instance Management
+
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2/client/create_launch_template.html
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2/client/run_instances.html
+https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RunInstances.html
+
+Cross-Account S3 Access
+
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-walkthroughs-managing-access-example2.html
+https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_s3/Bucket.html#aws_cdk.aws_s3.Bucket.add_to_resource_policy
+https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/PolicyStatement.html
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html
+
+JSON Handling
+
+https://docs.python.org/3/library/json.html
