@@ -34,9 +34,11 @@
                             <a class="nav-item nav-link" href="/ami_share">AMI Sharing</a>
                             <a class="nav-item nav-link" href="/ami">AMI Available</a>
                             <a class="nav-item nav-link" href="/labs">Labs Available</a>
+                            <a class="nav-item nav-link" href="/templates">Templates Available</a>
 
                             {% if session.get('role') == 'Educator' %}
                                 <a class="nav-item nav-link" href="/labsupload">Lab Upload</a>
+                                <a class="nav-item nav-link" href="/templateupload">Template Upload</a>
                             {% endif %}
                         {% endif %}
                     </div>

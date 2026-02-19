@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-section">
+    <h2 class="border-bottom mb-4">Create New Template</h2>
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="template_name">Template Name</label>
+            <input type="text" id="template_name" name="template_name" class="form-control" required>
+        </div>
+        <div class="form-group mt-3">
+            <label for="category_select">Select Category</label>
+            <select id="category_select" name="category_select" class="form-control">
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group mt-3">
+            <label for="ami_id">AMI ID</label>
+            <input type="text" id="ami_id" name="ami_id" class="form-control"
+                   value="ami-0abcdef1234567890" placeholder="ami-xxxxxxxxxxxxxxxxx">
+            <small class="form-text text-muted">Use a public AMI ID (like Amazon Linux or Ubuntu)</small>
+        </div>
+        <div class="form-group mt-3">
+            <label for="instance_type">Instance Type</label>
+            <select id="instance_type" name="instance_type" class="form-control">
+                <option value="t2.micro">t2.micro (Free Tier)</option>
+                <option value="t2.small">t2.small</option>
+                <option value="t3.micro">t3.micro</option>
+                <option value="t3.small">t3.small</option>
+            </select>
+        </div>
+        <div class="form-group mt-3">
+            <label for="description">Description (Optional)</label>
+            <textarea id="description" name="description" class="form-control" rows="3"
+                      placeholder="Describe what this template is for..."></textarea>
+        </div>
+        <div class="form-group mt-3">
+            <button type="submit" class="btn btn-outline-info">Create Template</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

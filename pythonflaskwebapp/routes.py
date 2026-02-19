@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 import boto3
 import os
 import re
+import json
 from . import app, get_user_group
 ##from .models import User, VM
 from .forms import (
@@ -21,6 +22,7 @@ AWS_REGION = os.environ.get("AWS_REGION")
 COGNITO_CLIENT_ID = os.environ.get("COGNITO_CLIENT_ID")
 COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID")
 LABS_BUCKET = os.environ.get('LABS_BUCKET_NAME')
+TEMPLATES_BUCKET = os.environ.get('TEMPLATES_BUCKET_NAME')
 cognito_client = boto3.client("cognito-idp", region_name=AWS_REGION)
 ec2 = boto3.client("ec2", region_name="eu-west-1")
 
@@ -111,7 +113,6 @@ def register():
         return redirect(url_for("confirm", email=form.email.data))
 
     return render_template("register.html", form=form)
-
 
 
 
@@ -296,6 +297,7 @@ def update_aws_credentials():
 
     if role == "Educator":
         aws_role_arn = request.form.get('aws_role_arn')
+        print(f"DEBUG: Role ARN received: {aws_role_arn}")  # DEBUG
 
         if aws_role_arn:
             try:
@@ -310,83 +312,166 @@ def update_aws_credentials():
                 session["aws_secret_access_key"] = credentials["SecretAccessKey"]
                 session["aws_session_token"] = credentials["SessionToken"]
 
+                print(f"DEBUG: Credentials stored in session")  # DEBUG
                 flash("AWS credentials updated.", "success")
             except ClientError as e:
-                flash("Error updating AWS credentials.", "danger")
+                print(f"DEBUG: AWS Error: {e}")  # DEBUG
+                flash(f"Error updating AWS credentials: {e.response['Error']['Message']}", "danger")
         else:
+            print("DEBUG: No Role ARN provided")  # DEBUG
             flash("Please enter AWS Role ARN.", "danger")
-
-    elif role == "Student":
-        access_key = request.form.get('aws_access_key_id')
-        secret_key = request.form.get('aws_secret_access_key')
-        session_token = request.form.get('aws_session_token')
-
-        if access_key and secret_key and session_token:
-            session["aws_access_key_id"] = access_key
-            session["aws_secret_access_key"] = secret_key
-            session["aws_session_token"] = session_token
-            flash("AWS credentials updated.", "success")
-        else:
-            flash("Please enter all AWS credentials.", "danger")
 
     return redirect(url_for("account"))
 
 
+@app.route("/templates")
+def templates():
+    categories = ["Web Servers", "Database Labs", "Security Labs", "Machine Learning"]
+    templates_by_category = {}
 
-@app.route("/ami_share", methods=["GET", "POST"])
-def share_ami():
-    aws_access_key_id = session.get("aws_access_key_id")
-    aws_secret_access_key = session.get("aws_secret_access_key")
-    aws_session_token = session.get("aws_session_token")
+    try:
+        s3 = get_s3_client()
 
-    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
-        flash("You must log in with AWS credentials first.", "warning")
-        return redirect(url_for("login"))
+        for category in categories:
+            response = s3.list_objects_v2(Bucket=TEMPLATES_BUCKET, Prefix=f"{category}/")
+
+            templates = []
+            if 'Contents' in response:
+                for obj in response['Contents']:
+                    if not obj['Key'].endswith('/'):
+                        name = obj['Key'].split('/')[-1].replace('.json', '')
+                        templates.append({
+                            'name': name,
+                            'key': obj['Key'],
+                            'size': obj['Size']
+                        })
+
+            templates_by_category[category] = templates
+
+    except ClientError:
+        flash("Could not load templates", "danger")
+        templates_by_category = {}
+
+    return render_template("templates.html", categories=categories, templates_by_category=templates_by_category)
+
+
+@app.route("/templateupload", methods=["GET", "POST"])
+def template_upload():
+    categories = ["Web Servers", "Database Labs", "Security Labs", "Machine Learning"]
 
     if request.method == "POST":
-        ami_id = request.form.get("ami_select")
-        account_ids = request.form.get("aws_accounts").replace(" ", "").split(",")
-        try:
-            share_user_ami_from_session(
-                aws_access_key_id,
-                aws_secret_access_key,
-                aws_session_token,
-                ami_id,
-                account_ids,
-                region="eu-west-1"
-            )
-            flash(f"AMI {ami_id} shared successfully!", "success")
-            return redirect(url_for("ami"))
-        except ClientError as e:
-            flash(f"Error: {e.response['Error']['Message']}", "danger")
-        except Exception as e:
-            flash(f"Error: {str(e)}", "danger")
-            return redirect(url_for("share_ami"))
+        template_name = request.form.get('template_name')
+        category = request.form.get('category_select')
+        ami_id = request.form.get('ami_id')
+        instance_type = request.form.get('instance_type')
+        description = request.form.get('description', '')
 
-    amis = list_user_amis_from_session(
-        aws_access_key_id,
-        aws_secret_access_key,
-        aws_session_token
-    )
-    amis_list = [{"ami_id": img["ImageId"], "name": img.get("Name", "Unnamed AMI")} for img in amis]
+        if not template_name or template_name == '':
+            flash("Please enter a template name", "danger")
+            return redirect(request.url)
 
-    return render_template("ami_share.html", amis=amis_list)
+        if template_name and category:
+            try:
+                template_data = {
+                    "LaunchTemplateName": template_name,
+                    "LaunchTemplateData": {
+                        "ImageId": ami_id,
+                        "InstanceType": instance_type,
+                        "TagSpecifications": [
+                            {
+                                "ResourceType": "instance",
+                                "Tags": [
+                                    {"Key": "Name", "Value": template_name}
+                                ]
+                            }
+                        ]
+                    },
+                    "Description": description,
+                    "CreatedBy": session.get('email'),
+                    "Category": category
+                }
+
+                filename = f"{template_name}.json"
+                key = f"{category}/{filename}"
+
+                s3 = get_s3_client()
+                s3.put_object(
+                    Bucket=TEMPLATES_BUCKET,
+                    Key=key,
+                    Body=json.dumps(template_data, indent=2),
+                    ContentType='application/json'
+                )
+
+                flash("Template uploaded successfully", "success")
+                return redirect(url_for('templates'))
+
+            except ClientError:
+                flash("Upload failed", "danger")
+
+    return render_template("template_upload.html", categories=categories)
 
 
+@app.route("/launch/<path:template_key>")
+def launch_instance(template_key):
+    try:
+        # Get template from S3
+        s3 = get_s3_client()
+        template_obj = s3.get_object(Bucket=TEMPLATES_BUCKET, Key=template_key)
+        template_data = json.loads(template_obj['Body'].read())
 
-@app.route("/ami", methods=["GET"])
-def ami():
-    ec2 = boto3.client('ec2', region_name='us-east-1')
-    response = ec2.describe_images(Owners=['self'])
+        # Get user's AWS credentials
+        aws_access_key_id = session.get("aws_access_key_id")
+        aws_secret_access_key = session.get("aws_secret_access_key")
+        aws_session_token = session.get("aws_session_token")
 
-    amis = [
-        {'ami_id': img['ImageId'], 'name': img.get('Name', 'Unnamed AMI')}
-        for img in response['Images']
-    ]
+        if not aws_access_key_id or not aws_secret_access_key:
+            flash("Please configure your AWS credentials first", "warning")
+            return redirect(url_for("account"))
 
-    return render_template("ami.html", amis=amis)
+        # Create EC2 client
+        ec2 = boto3.client(
+            'ec2',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name='us-east-1'
+        )
+
+        # Launch instance
+        response = ec2.run_instances(
+            ImageId=template_data['LaunchTemplateData']['ImageId'],
+            InstanceType=template_data['LaunchTemplateData']['InstanceType'],
+            MinCount=1,
+            MaxCount=1,
+            TagSpecifications=template_data['LaunchTemplateData']['TagSpecifications']
+        )
+
+        instance_id = response['Instances'][0]['InstanceId']
+        flash(f"Instance {instance_id} launched successfully!", "success")
+
+    except ClientError:
+        flash("Failed to launch instance", "danger")
+    except:
+        flash("Could not launch instance", "danger")
+
+    return redirect(url_for('templates'))
 
 
+@app.route("/delete_template/<path:template_key>", methods=["POST"])
+def delete_template(template_key):
+    # Only educators can delete
+    if session.get("role") != "Educator":
+        flash("Only educators can delete templates", "danger")
+        return redirect(url_for("templates"))
+
+    try:
+        s3 = get_s3_client()
+        s3.delete_object(Bucket=TEMPLATES_BUCKET, Key=template_key)
+        flash("Template deleted successfully", "success")
+    except ClientError:
+        flash("Failed to delete template", "danger")
+
+    return redirect(url_for("templates"))
 
 
 
@@ -470,6 +555,23 @@ def view_lab(lab_key):
     except ClientError:
         flash("Can't view that file", "danger")
         return redirect(url_for('labs'))
+
+
+@app.route("/delete_lab/<path:lab_key>", methods=["POST"])
+def delete_lab(lab_key):
+    # Only educators can delete
+    if session.get("role") != "Educator":
+        flash("Only educators can delete labs", "danger")
+        return redirect(url_for("labs"))
+
+    try:
+        s3 = get_s3_client()
+        s3.delete_object(Bucket=LABS_BUCKET, Key=lab_key)
+        flash("Lab deleted successfully", "success")
+    except ClientError:
+        flash("Failed to delete lab", "danger")
+
+    return redirect(url_for("labs"))
 
 
 

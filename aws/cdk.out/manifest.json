@@ -132,7 +132,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-deploy-role-427919793184-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-cfn-exec-role-427919793184-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/e4c4f616d469ad44acd16b5b0094a53aab9ab1e76bd9b822c80615da6edf6b0f.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/75f87d7d67d436fe798728b15f1479a85889165d023a01e36e80b90d7bea45b9.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -210,6 +210,102 @@
         ]
       },
       "displayName": "LabsStack"
+    },
+    "TemplatesStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "TemplatesStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "TemplatesStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://427919793184/us-east-1",
+      "properties": {
+        "templateFile": "TemplatesStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-deploy-role-427919793184-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-cfn-exec-role-427919793184-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/5a90f606a2fc048bfd81b8dfd44430c7a6dc876702eb2ae5ce56823d69ccacfa.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "TemplatesStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-lookup-role-427919793184-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "TemplatesStack.assets"
+      ],
+      "metadata": {
+        "/TemplatesStack/TemplatesBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TemplatesBucketB07CED20"
+          }
+        ],
+        "/TemplatesStack/TemplatesBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TemplatesBucketPolicyC9ACD904"
+          }
+        ],
+        "/TemplatesStack/TemplatesBucket/AutoDeleteObjectsCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TemplatesBucketAutoDeleteObjectsCustomResource2F94A2B6"
+          }
+        ],
+        "/TemplatesStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+            "data": true
+          }
+        ],
+        "/TemplatesStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+          }
+        ],
+        "/TemplatesStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+          }
+        ],
+        "/TemplatesStack/BucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BucketName"
+          }
+        ],
+        "/TemplatesStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/TemplatesStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/TemplatesStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "TemplatesStack"
     },
     "Tree": {
       "type": "cdk:tree",
