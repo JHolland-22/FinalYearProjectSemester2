@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="h2">Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ session.get('email') }}</p>
+        </div>
+    </div>
+
+    <!-- AWS Academy Timer Card -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">AWS Academy Session Timer</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div id="timer-display" class="display-4 mb-3">
+                        Loading...
+                    </div>
+                    <div id="timer-status" class="mb-3">
+                        Session Active
+                    </div>
+                    <a href="{{ url_for('account') }}" class="btn btn-primary">
+                        Refresh Credentials
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <p>Role: <span class="badge bg-info">{{ session.get('role') }}</span></p>
+                    <p>Class Group: <span class="text-muted">{{ session.get('class_group', 'Not set') }}</span></p>
+                    <p>Session Started: <span id="login-time"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// JavaScript timer functionality
+const loginTime = new Date("{{ session.get('login_time') }}").getTime();
+const FOUR_HOURS = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+
+// Update timer every second
+const timerInterval = setInterval(function() {
+    const now = new Date().getTime();
+    const elapsed = now - loginTime;
+    const remaining = FOUR_HOURS - elapsed;
+    
+    if (remaining > 0) {
+        // Calculate hours, minutes, seconds
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        
+        const display = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('timer-display').textContent = display;
+        
+        // Color changes based on time remaining
+        const timerElement = document.getElementById('timer-display');
+        const statusElement = document.getElementById('timer-status');
+        
+        if (remaining > 2 * 60 * 60 * 1000) { // > 2 hours
+            timerElement.className = 'display-4 mb-3 text-success';
+            statusElement.textContent = 'Session Active';
+            statusElement.className = 'mb-3 text-success';
+        } else if (remaining > 1 * 60 * 60 * 1000) { // 1-2 hours
+            timerElement.className = 'display-4 mb-3 text-warning';
+            statusElement.textContent = 'Session Warning';
+            statusElement.className = 'mb-3 text-warning';
+        } else { // < 1 hour
+            timerElement.className = 'display-4 mb-3 text-danger';
+            statusElement.textContent = 'Session Expiring Soon!';
+            statusElement.className = 'mb-3 text-danger';
+        }
+    } else {
+        // Session expired
+        document.getElementById('timer-display').textContent = 'EXPIRED';
+        document.getElementById('timer-display').className = 'display-4 mb-3 text-danger';
+        document.getElementById('timer-status').textContent = 'Please refresh your credentials';
+        document.getElementById('timer-status').className = 'mb-3 text-danger';
+        clearInterval(timerInterval);
+    }
+}, 1000); // Update every second
+
+// Display formatted login time
+const loginDate = new Date("{{ session.get('login_time') }}");
+document.getElementById('login-time').textContent = loginDate.toLocaleString();
+</script>
+
+{% endblock %}

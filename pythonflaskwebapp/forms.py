@@ -73,12 +73,5 @@ class LoginForm(FlaskForm):
 
 
 
-class UpdateAccountForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    submit = SubmitField('Update')
 
 
-class AmiShareForm(FlaskForm):
-    ami_id = StringField("AMI Image ID", validators=[DataRequired()])
-    account_ids = StringField("AWS Account IDs")
-    submit = SubmitField("Share AMI")

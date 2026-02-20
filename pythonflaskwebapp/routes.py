@@ -1,7 +1,8 @@
+
 from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.utils import secure_filename
-
+from datetime import datetime
 from .aws_utils import list_user_amis_from_session, share_user_ami_from_session, get_s3_client
 from botocore.exceptions import ClientError
 import boto3
@@ -13,8 +14,6 @@ from . import app, get_user_group
 from .forms import (
     RegistrationForm,
     LoginForm,
-    UpdateAccountForm,
-    AmiShareForm,
     ConfirmForm
 )
 
@@ -272,20 +271,12 @@ def logout():
     return redirect(url_for("choose_role"))
 
 
-@app.route("/account", methods=["GET", "POST"])
+@app.route("/account", methods=["GET"])
 def account():
     if "email" not in session:
         return redirect(url_for("choose_role"))
 
-    form = UpdateAccountForm()
-
-    if form.validate_on_submit():
-        session["email"] = form.email.data
-        flash("Account updated successfully.", "success")
-        return redirect(url_for("account"))
-
-    form.email.data = session.get("email", "")
-    return render_template("account.html", form=form)
+    return render_template("account.html")
 
 
 @app.route("/update_aws_credentials", methods=["POST"])
@@ -578,3 +569,15 @@ def delete_lab(lab_key):
 @app.route("/login-choice")
 def login_choice():
     return render_template("choose_role.html")
+
+
+@app.route("/dashboard")
+def dashboard():
+    if "email" not in session:
+        return redirect(url_for("choose_role"))
+
+    # Store login timestamp if not already stored
+    if "login_time" not in session:
+        session["login_time"] = datetime.now().isoformat()
+
+    return render_template("dashboard.html")
