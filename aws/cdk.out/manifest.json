@@ -1,5 +1,5 @@
 {
-  "version": "48.0.0",
+  "version": "52.0.0",
   "artifacts": {
     "AuthStack.assets": {
       "type": "cdk:asset-manifest",
@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1/8bdc776a0f9bb9b81b1fa2077900782fd308c0d52064cacfe6d6135c23fc3b27.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1/b76df0249355ac2ef11283135ce32c1a26bb2f98e6513814916f6ee4ef6bd383.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -132,7 +132,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-deploy-role-427919793184-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-cfn-exec-role-427919793184-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/75f87d7d67d436fe798728b15f1479a85889165d023a01e36e80b90d7bea45b9.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/3e67fda2b5fbbbb93bac01bede0adaeefc5fdb1a15090ccf69721c0bf3f97f7a.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -228,7 +228,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-deploy-role-427919793184-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427919793184:role/cdk-hnb659fds-cfn-exec-role-427919793184-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/5a90f606a2fc048bfd81b8dfd44430c7a6dc876702eb2ae5ce56823d69ccacfa.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427919793184-us-east-1/6bdbc72e6359edbe738bf3e0d6383e9b70e8932d783fcf9c3475b3b647c9c381.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -728,10 +728,17 @@
           "@aws-cdk/aws-route53-patterns:useDistribution": {
             "recommendedValue": true,
             "explanation": "Use the `Distribution` resource instead of `CloudFrontWebDistribution`"
+          },
+          "@aws-cdk/core:automaticL1Traits": {
+            "recommendedValue": true,
+            "explanation": "Automatically use the default L1 traits for L1 constructs`",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
           }
         }
       }
     }
   },
-  "minimumCliVersion": "2.1033.0"
+  "minimumCliVersion": "2.1107.0"
 }

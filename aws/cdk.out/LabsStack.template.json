@@ -213,7 +213,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WNUQ6CMBBEz8J/WZXGxF/hABI8gMGy4gq0pLvVEMLdhWBC/JqZN5lMAok+wT4qPxybqolbusN4ldI0akY31jCmwTQoKnvYn1sldy2ZYcNrnlQWWFxXILvgDS795v+q3Ls3VejTklGdmVHm35psvWwuQfogk8oHeTq703DQcIxeTBT7YIU6hGLVLza0G4nCAAAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WNUQ6CMBBEz8J/WaV4AeEAEjyAwbLiCrSku9UQwt2FYEL8mpk3mYwGfUrgGFUfjk3dxh3dYbpKZVq1oBunMGXBtCgqf9if26RwHZlxx1ueVR5YXF8iu+ANrv3u/6rCuzfV6LOKUZ2ZUZbfhmyzbi5BhiCzKkZ5OntIIdGQpNGLiWIfrFCPUG76BWNOGfnDAAAA"
    },
    "Metadata": {
     "aws:cdk:path": "LabsStack/CDKMetadata/Default"

@@ -1,4 +1,5 @@
-
+import json
+import base64
 from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.utils import secure_filename
@@ -8,7 +9,6 @@ from botocore.exceptions import ClientError
 import boto3
 import os
 import re
-import json
 from . import app, get_user_group
 ##from .models import User, VM
 from .forms import (
@@ -26,20 +26,17 @@ cognito_client = boto3.client("cognito-idp", region_name=AWS_REGION)
 ec2 = boto3.client("ec2", region_name="eu-west-1")
 
 
-
-def get_instance_id_by_name(name):
-    reservations = ec2.describe_instances(
-        Filters=[{"Name": "tag:Name", "Values": [name]}]
-    )["Reservations"]
-    if reservations:
-        return reservations[0]["Instances"][0]["InstanceId"]
-    return None
-
-
 @app.route("/")
-@app.route("/home")
-def home():
-    return render_template("home.html")
+@app.route("/dashboard")
+def dashboard():
+    if "email" not in session:
+        return redirect(url_for("choose_role"))
+
+    # Store login timestamp if not already stored
+    if "login_time" not in session:
+        session["login_time"] = datetime.now().isoformat()
+
+    return render_template("dashboard.html")
 
 
 @app.route("/about")
@@ -47,41 +44,86 @@ def about():
     return render_template("about.html", title="About")
 
 
-@app.route("/start_kali")
-def start_kali():
-    instance_id = get_instance_id_by_name("KaliVM")
+@app.route("/instances")
+def instances():
+    if "email" not in session:
+        return redirect(url_for("choose_role"))
+
+    if not session.get("aws_access_key_id"):
+        flash("Please configure your AWS credentials first", "warning")
+        return redirect(url_for("account"))
+
+    try:
+        ec2 = boto3.client(
+            'ec2',
+            aws_access_key_id=session["aws_access_key_id"],
+            aws_secret_access_key=session["aws_secret_access_key"],
+            aws_session_token=session.get("aws_session_token"),
+            region_name='eu-west-1'  # Changed from us-east-1
+        )
+
+        response = ec2.describe_instances()
+        instances = []
+
+        for reservation in response['Reservations']:
+            for instance in reservation['Instances']:
+                name = "Unnamed"
+                for tag in instance.get('Tags', []):
+                    if tag['Key'] == 'Name':
+                        name = tag['Value']
+
+                instances.append({
+                    'id': instance['InstanceId'],
+                    'name': name,
+                    'state': instance['State']['Name'],
+                    'type': instance['InstanceType']
+                })
+
+        return render_template("instances.html", instances=instances)
+
+    except:
+        return render_template("instances.html", instances=[])
+
+
+@app.route("/start_instance/<instance_id>")
+def start_instance(instance_id):
+    if "email" not in session:
+        return redirect(url_for("choose_role"))
+
+    ec2 = boto3.client(
+        'ec2',
+        aws_access_key_id=session["aws_access_key_id"],
+        aws_secret_access_key=session["aws_secret_access_key"],
+        aws_session_token=session.get("aws_session_token"),
+        region_name='eu-west-1'  # Changed from us-east-1
+    )
+
     ec2.start_instances(InstanceIds=[instance_id])
-    return redirect(url_for("home"))
+    return redirect(url_for('instances'))
 
 
-@app.route("/stop_kali")
-def stop_kali():
-    instance_id = get_instance_id_by_name("KaliVM")
+@app.route("/stop_instance/<instance_id>")
+def stop_instance(instance_id):
+    if "email" not in session:
+        return redirect(url_for("choose_role"))
+
+    ec2 = boto3.client(
+        'ec2',
+        aws_access_key_id=session["aws_access_key_id"],
+        aws_secret_access_key=session["aws_secret_access_key"],
+        aws_session_token=session.get("aws_session_token"),
+        region_name='eu-west-1'  # Changed from us-east-1
+    )
+
     ec2.stop_instances(InstanceIds=[instance_id])
-    return redirect(url_for("home"))
-
-
-@app.route("/start_ubuntu")
-def start_ubuntu():
-    instance_id = get_instance_id_by_name("UbuntuVM")
-    ec2.start_instances(InstanceIds=[instance_id])
-    return redirect(url_for("home"))
-
-
-@app.route("/stop_ubuntu")
-def stop_ubuntu():
-    instance_id = get_instance_id_by_name("UbuntuVM")
-    ec2.stop_instances(InstanceIds=[instance_id])
-    return redirect(url_for("home"))
-
-
+    return redirect(url_for('instances'))
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # Redirect logged-in users to home
+    # Redirect logged-in users to dashboard
     if session.get("email"):
-        return redirect(url_for("home"))
+        return redirect(url_for("dashboard"))
 
     form = RegistrationForm()
 
@@ -112,9 +154,6 @@ def register():
         return redirect(url_for("confirm", email=form.email.data))
 
     return render_template("register.html", form=form)
-
-
-
 
 
 @app.route("/confirm", methods=["GET", "POST"])
@@ -150,13 +189,9 @@ def confirm():
     return render_template("confirm.html", form=form)
 
 
-
-
-
 @app.route("/choose_role", methods=["GET"])
 def choose_role():
     return render_template("choose_role.html")
-
 
 
 @app.route("/educator_login", methods=["GET", "POST"])
@@ -204,7 +239,7 @@ def educator_login():
                 flash("Please enter your AWS Role ARN.", "danger")
                 return render_template("educator_login.html", form=form)
 
-            return redirect(url_for("home"))
+            return redirect(url_for("dashboard"))
 
         except cognito_client.exceptions.UserNotConfirmedException:
             flash("Account not confirmed", "warning")
@@ -251,7 +286,7 @@ def student_login():
                 flash("Please enter all AWS Academy credentials.", "danger")
                 return render_template("student_login.html", form=form)
 
-            return redirect(url_for("home"))
+            return redirect(url_for("dashboard"))
 
         except cognito_client.exceptions.UserNotConfirmedException:
             flash("Account not confirmed", "warning")
@@ -261,7 +296,6 @@ def student_login():
             flash(e.response["Error"]["Message"], "danger")
 
     return render_template("student_login.html", form=form)
-
 
 
 
@@ -315,102 +349,54 @@ def update_aws_credentials():
     return redirect(url_for("account"))
 
 
+
+
 @app.route("/templates")
 def templates():
-    categories = ["Web Servers", "Database Labs", "Security Labs", "Machine Learning"]
-    templates_by_category = {}
+    templates = []
+    user_class_group = session.get('class_group')
+    is_educator = session.get('role') == 'Educator'
 
     try:
         s3 = get_s3_client()
+        response = s3.list_objects_v2(Bucket=TEMPLATES_BUCKET)
 
-        for category in categories:
-            response = s3.list_objects_v2(Bucket=TEMPLATES_BUCKET, Prefix=f"{category}/")
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                if not obj['Key'].endswith('/'):
+                    try:
+                        template_obj = s3.get_object(Bucket=TEMPLATES_BUCKET, Key=obj['Key'])
+                        template_data = json.loads(template_obj['Body'].read())
+                        template_class_group = template_data.get('ClassGroup')
 
-            templates = []
-            if 'Contents' in response:
-                for obj in response['Contents']:
-                    if not obj['Key'].endswith('/'):
-                        name = obj['Key'].split('/')[-1].replace('.json', '')
-                        templates.append({
-                            'name': name,
-                            'key': obj['Key'],
-                            'size': obj['Size']
-                        })
-
-            templates_by_category[category] = templates
+                        if is_educator or template_class_group == user_class_group or template_class_group == "All":
+                            name = obj['Key'].split('/')[-1].replace('.json', '') if '/' in obj['Key'] else obj[
+                                'Key'].replace('.json', '')
+                            templates.append({
+                                'name': name,
+                                'key': obj['Key'],
+                                'size': obj['Size'],
+                                'description': template_data.get('Description', '')
+                            })
+                    except:
+                        pass
 
     except ClientError:
         flash("Could not load templates", "danger")
-        templates_by_category = {}
+        templates = []
 
-    return render_template("templates.html", categories=categories, templates_by_category=templates_by_category)
-
-
-@app.route("/templateupload", methods=["GET", "POST"])
-def template_upload():
-    categories = ["Web Servers", "Database Labs", "Security Labs", "Machine Learning"]
-
-    if request.method == "POST":
-        template_name = request.form.get('template_name')
-        category = request.form.get('category_select')
-        ami_id = request.form.get('ami_id')
-        instance_type = request.form.get('instance_type')
-        description = request.form.get('description', '')
-
-        if not template_name or template_name == '':
-            flash("Please enter a template name", "danger")
-            return redirect(request.url)
-
-        if template_name and category:
-            try:
-                template_data = {
-                    "LaunchTemplateName": template_name,
-                    "LaunchTemplateData": {
-                        "ImageId": ami_id,
-                        "InstanceType": instance_type,
-                        "TagSpecifications": [
-                            {
-                                "ResourceType": "instance",
-                                "Tags": [
-                                    {"Key": "Name", "Value": template_name}
-                                ]
-                            }
-                        ]
-                    },
-                    "Description": description,
-                    "CreatedBy": session.get('email'),
-                    "Category": category
-                }
-
-                filename = f"{template_name}.json"
-                key = f"{category}/{filename}"
-
-                s3 = get_s3_client()
-                s3.put_object(
-                    Bucket=TEMPLATES_BUCKET,
-                    Key=key,
-                    Body=json.dumps(template_data, indent=2),
-                    ContentType='application/json'
-                )
-
-                flash("Template uploaded successfully", "success")
-                return redirect(url_for('templates'))
-
-            except ClientError:
-                flash("Upload failed", "danger")
-
-    return render_template("template_upload.html", categories=categories)
+    return render_template("templates.html", templates=templates)
 
 
 @app.route("/launch/<path:template_key>")
 def launch_instance(template_key):
+    print(f"DEBUG: Launching template: {template_key}")
     try:
-        # Get template from S3
         s3 = get_s3_client()
         template_obj = s3.get_object(Bucket=TEMPLATES_BUCKET, Key=template_key)
         template_data = json.loads(template_obj['Body'].read())
+        print(f"DEBUG: AMI ID: {template_data['LaunchTemplateData']['ImageId']}")
 
-        # Get user's AWS credentials
         aws_access_key_id = session.get("aws_access_key_id")
         aws_secret_access_key = session.get("aws_secret_access_key")
         aws_session_token = session.get("aws_session_token")
@@ -419,38 +405,173 @@ def launch_instance(template_key):
             flash("Please configure your AWS credentials first", "warning")
             return redirect(url_for("account"))
 
-        # Create EC2 client
         ec2 = boto3.client(
             'ec2',
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
             aws_session_token=aws_session_token,
-            region_name='us-east-1'
+            region_name='eu-west-1'
         )
 
-        # Launch instance
-        response = ec2.run_instances(
-            ImageId=template_data['LaunchTemplateData']['ImageId'],
-            InstanceType=template_data['LaunchTemplateData']['InstanceType'],
-            MinCount=1,
-            MaxCount=1,
-            TagSpecifications=template_data['LaunchTemplateData']['TagSpecifications']
-        )
+        # Prepare launch parameters
+        launch_params = {
+            'ImageId': template_data['LaunchTemplateData']['ImageId'],
+            'InstanceType': template_data['LaunchTemplateData']['InstanceType'],
+            'MinCount': 1,
+            'MaxCount': 1
+        }
+
+        # Add user data if present
+        user_data = template_data['LaunchTemplateData'].get('UserData', '')
+        if user_data:
+            user_data_encoded = base64.b64encode(user_data.encode()).decode()
+            launch_params['UserData'] = user_data_encoded
+            print(f"DEBUG: Added user data to launch")
+
+        print(f"DEBUG: About to launch instance...")
+        response = ec2.run_instances(**launch_params)
 
         instance_id = response['Instances'][0]['InstanceId']
+        print(f"DEBUG: Launched instance: {instance_id}")
         flash(f"Instance {instance_id} launched successfully!", "success")
 
-    except ClientError:
+    except Exception as e:
+        print(f"DEBUG: Launch failed with error: {e}")
         flash("Failed to launch instance", "danger")
-    except:
-        flash("Could not launch instance", "danger")
 
-    return redirect(url_for('templates'))
+    return redirect(url_for('instances'))
+
+
+@app.route("/templateupload", methods=["GET", "POST"])
+def template_upload():
+    if request.method == "POST":
+        template_name = request.form.get('template_name')
+        ami_id = request.form.get('ami_id')
+        instance_type = request.form.get('instance_type')
+        description = request.form.get('description', '')
+        share_with = request.form.get('share_with')
+        user_data = request.form.get('user_data', '')
+
+        print(f"DEBUG: Got form data - name:'{template_name}', ami:'{ami_id}'")
+
+        if not template_name or template_name == '':
+            flash("Please enter a template name", "danger")
+            return redirect(request.url)
+
+        if not ami_id or ami_id == '':
+            flash("Please enter an AMI ID", "danger")
+            return redirect(request.url)
+
+        if not description or description == '':
+            flash("Please enter a description", "danger")
+            return redirect(request.url)
+
+        try:
+            template_data = {
+                "LaunchTemplateName": template_name,
+                "LaunchTemplateData": {
+                    "ImageId": ami_id,
+                    "InstanceType": instance_type,
+                },
+                "Description": description,
+                "CreatedBy": session.get('email'),
+                "ClassGroup": share_with
+            }
+
+            # Add user data if provided
+            if user_data:
+                template_data["LaunchTemplateData"]["UserData"] = user_data
+
+            filename = f"{template_name}.json"
+            print(f"DEBUG: S3 key will be: {filename}")
+
+            s3 = get_s3_client()
+            s3.put_object(
+                Bucket=TEMPLATES_BUCKET,
+                Key=filename,
+                Body=json.dumps(template_data, indent=2),
+                ContentType='application/json'
+            )
+
+            print("DEBUG: S3 upload successful!")
+            flash("Template uploaded successfully", "success")
+            return redirect(url_for('templates'))
+
+        except Exception as e:
+            print(f"DEBUG: S3 upload failed: {e}")
+            flash("Upload failed", "danger")
+
+    return render_template("template_upload.html")
+
+
+@app.route("/edit_template/<path:template_key>", methods=["GET", "POST"])
+def edit_template(template_key):
+    if session.get("role") != "Educator":
+        flash("Only educators can edit templates", "danger")
+        return redirect(url_for("templates"))
+
+    if request.method == "GET":
+        try:
+            s3 = get_s3_client()
+            template_obj = s3.get_object(Bucket=TEMPLATES_BUCKET, Key=template_key)
+            template_data = json.loads(template_obj['Body'].read())
+
+            form_data = {
+                'template_name': template_data['LaunchTemplateName'],
+                'ami_id': template_data['LaunchTemplateData']['ImageId'],
+                'instance_type': template_data['LaunchTemplateData']['InstanceType'],
+                'description': template_data.get('Description', ''),
+                'share_with': template_data.get('ClassGroup', ''),
+                'user_data': template_data['LaunchTemplateData'].get('UserData', '')
+            }
+
+            return render_template("template_upload.html", form_data=form_data, edit_mode=True,
+                                   template_key=template_key)
+        except:
+            flash("Could not load template", "danger")
+            return redirect(url_for("templates"))
+
+    # POST - Update template (same logic as template_upload but save to existing key)
+    template_name = request.form.get('template_name')
+    ami_id = request.form.get('ami_id')
+    instance_type = request.form.get('instance_type')
+    description = request.form.get('description', '')
+    share_with = request.form.get('share_with')
+    user_data = request.form.get('user_data', '')
+
+    try:
+        template_data = {
+            "LaunchTemplateName": template_name,
+            "LaunchTemplateData": {
+                "ImageId": ami_id,
+                "InstanceType": instance_type,
+            },
+            "Description": description,
+            "CreatedBy": session.get('email'),
+            "ClassGroup": share_with
+        }
+
+        if user_data:
+            template_data["LaunchTemplateData"]["UserData"] = user_data
+
+        s3 = get_s3_client()
+        s3.put_object(
+            Bucket=TEMPLATES_BUCKET,
+            Key=template_key,
+            Body=json.dumps(template_data, indent=2),
+            ContentType='application/json'
+        )
+
+        flash("Template updated successfully", "success")
+        return redirect(url_for('templates'))
+
+    except Exception as e:
+        flash("Failed to update template", "danger")
+        return redirect(url_for("templates"))
 
 
 @app.route("/delete_template/<path:template_key>", methods=["POST"])
 def delete_template(template_key):
-    # Only educators can delete
     if session.get("role") != "Educator":
         flash("Only educators can delete templates", "danger")
         return redirect(url_for("templates"))
@@ -497,7 +618,6 @@ def labs():
     return render_template("labs.html", categories=categories, labs_by_category=labs_by_category)
 
 
-
 @app.route("/labsupload", methods=["GET", "POST"])
 def lab_upload():
     categories = ["Networking", "Databases", "Security", "Machine Learning"]
@@ -525,7 +645,6 @@ def lab_upload():
                 flash("Upload failed", "danger")
 
     return render_template("labs_upload.html", categories=categories)
-
 
 
 @app.route("/view/<path:lab_key>")
@@ -569,15 +688,3 @@ def delete_lab(lab_key):
 @app.route("/login-choice")
 def login_choice():
     return render_template("choose_role.html")
-
-
-@app.route("/dashboard")
-def dashboard():
-    if "email" not in session:
-        return redirect(url_for("choose_role"))
-
-    # Store login timestamp if not already stored
-    if "login_time" not in session:
-        session["login_time"] = datetime.now().isoformat()
-
-    return render_template("dashboard.html")

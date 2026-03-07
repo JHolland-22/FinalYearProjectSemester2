@@ -2,24 +2,30 @@
 
 {% block content %}
 <div class="content-section">
-    <h2 class="border-bottom mb-4">Create New Template</h2>
+    <h2 class="border-bottom mb-4">
+        {% if edit_mode %}Edit Template{% else %}Create New Template{% endif %}
+    </h2>
     <form method="POST" action="">
         <div class="form-group">
             <label for="template_name">Template Name</label>
-            <input type="text" id="template_name" name="template_name" class="form-control" required>
+            <input type="text" id="template_name" name="template_name" class="form-control"
+                   value="{{ form_data.template_name if form_data else '' }}" required>
         </div>
         <div class="form-group mt-3">
-            <label for="category_select">Select Category</label>
-            <select id="category_select" name="category_select" class="form-control">
-                {% for category in categories %}
-                    <option value="{{ category }}">{{ category }}</option>
-                {% endfor %}
+            <label for="share_with">Share With Class Group</label>
+            <select name="share_with" id="share_with" class="form-control" required>
+                <option value="">Select Class Group</option>
+                <option value="devops">DevOps</option>
+                <option value="cloud computing">Cloud Computing</option>
+                <option value="network security">Network Security</option>
+                <option value="All">All Classes (Public)</option>
             </select>
         </div>
         <div class="form-group mt-3">
             <label for="ami_id">AMI ID</label>
             <input type="text" id="ami_id" name="ami_id" class="form-control"
-                   value="ami-0abcdef1234567890" placeholder="ami-xxxxxxxxxxxxxxxxx">
+                   value="{{ form_data.ami_id if form_data else '' }}"
+                   placeholder="ami-xxxxxxxxxxxxxxxxx" required>
         </div>
         <div class="form-group mt-3">
             <label for="instance_type">Instance Type</label>
@@ -28,17 +34,23 @@
                 <option value="t2.small">t2.small</option>
                 <option value="t3.micro">t3.micro</option>
                 <option value="t3.small">t3.small</option>
+                <option value="t2.medium">t2.medium</option>
             </select>
         </div>
         <div class="form-group mt-3">
-            <label for="description">Description (Optional)</label>
-            <textarea id="description" name="description" class="form-control" rows="3"
-                      placeholder="Describe what this template is for..."></textarea>
+            <label for="description">Description</label>
+            <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
         </div>
         <div class="form-group mt-3">
-            <button type="submit" class="btn btn-outline-info">Create Template</button>
+            <label for="user_data">User Data Script (Optional)</label>
+            <textarea id="user_data" name="user_data" class="form-control" rows="8">
+            </textarea>
+        </div>
+        <div class="form-group mt-3">
+            <button type="submit" class="btn btn-outline-info">
+                {% if edit_mode %}Update Template{% else %}Create Template{% endif %}
+            </button>
         </div>
     </form>
 </div>
 {% endblock %}
-
