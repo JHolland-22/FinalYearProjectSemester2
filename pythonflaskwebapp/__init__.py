@@ -37,4 +37,4 @@ def get_user_group(username):
 from . import routes
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8081, debug=True)

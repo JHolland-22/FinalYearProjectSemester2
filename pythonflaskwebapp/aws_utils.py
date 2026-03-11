@@ -2,7 +2,7 @@ import boto3
 from flask import session
 
 
-def ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region="eu-west-1"):
+def ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region="us-east-1"):
     return boto3.client(
         "ec2",
         region_name=region,
@@ -11,7 +11,7 @@ def ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_sessio
         aws_session_token=aws_session_token
     )
 
-def list_user_amis_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region="eu-west-1"):
+def list_user_amis_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region="us-east-1"):
     ec2 = ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region)
     own_images = ec2.describe_images(Owners=["self"])["Images"]
     shared_images = ec2.describe_images(ExecutableUsers=["self"])["Images"]

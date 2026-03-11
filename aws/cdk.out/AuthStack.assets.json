@@ -8,26 +8,26 @@
         "packaging": "zip"
       },
       "destinations": {
-        "current_account-eu-west-1-ba55e514": {
-          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+        "current_account-us-east-1-03004868": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
           "objectKey": "29e5c41641068a10617720f724a1a8c343b2d10d3bdf7f6318e1954406b30c6f.zip",
-          "region": "eu-west-1",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }
       }
     },
-    "b76df0249355ac2ef11283135ce32c1a26bb2f98e6513814916f6ee4ef6bd383": {
+    "b235ae26d1df9a1e24778948844b0a722892bb4852775a58e76f77464ff08df8": {
       "displayName": "AuthStack Template",
       "source": {
         "path": "AuthStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-eu-west-1-ea9923b5": {
-          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
-          "objectKey": "b76df0249355ac2ef11283135ce32c1a26bb2f98e6513814916f6ee4ef6bd383.json",
-          "region": "eu-west-1",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+        "current_account-us-east-1-c649948d": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+          "objectKey": "b235ae26d1df9a1e24778948844b0a722892bb4852775a58e76f77464ff08df8.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }
       }
     }

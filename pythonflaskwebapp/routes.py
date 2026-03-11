@@ -4,7 +4,7 @@ from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from .aws_utils import list_user_amis_from_session, share_user_ami_from_session, get_s3_client
+from .aws_utils import list_user_amis_from_session, share_user_ami_from_session, get_s3_client, ec2_client_from_session
 from botocore.exceptions import ClientError
 import boto3
 import os
@@ -16,6 +16,9 @@ from .forms import (
     LoginForm,
     ConfirmForm
 )
+import requests
+import time
+import threading
 
 AWS_REGION = os.environ.get("AWS_REGION")
 COGNITO_CLIENT_ID = os.environ.get("COGNITO_CLIENT_ID")
@@ -23,7 +26,7 @@ COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID")
 LABS_BUCKET = os.environ.get('LABS_BUCKET_NAME')
 TEMPLATES_BUCKET = os.environ.get('TEMPLATES_BUCKET_NAME')
 cognito_client = boto3.client("cognito-idp", region_name=AWS_REGION)
-ec2 = boto3.client("ec2", region_name="eu-west-1")
+ec2 = boto3.client("ec2", region_name="us-east-1")
 
 
 @app.route("/")
@@ -59,7 +62,7 @@ def instances():
             aws_access_key_id=session["aws_access_key_id"],
             aws_secret_access_key=session["aws_secret_access_key"],
             aws_session_token=session.get("aws_session_token"),
-            region_name='eu-west-1'  # Changed from us-east-1
+            region_name='us-east-1'
         )
 
         response = ec2.describe_instances()
@@ -95,7 +98,7 @@ def start_instance(instance_id):
         aws_access_key_id=session["aws_access_key_id"],
         aws_secret_access_key=session["aws_secret_access_key"],
         aws_session_token=session.get("aws_session_token"),
-        region_name='eu-west-1'  # Changed from us-east-1
+        region_name='us-east-1'
     )
 
     ec2.start_instances(InstanceIds=[instance_id])
@@ -112,7 +115,7 @@ def stop_instance(instance_id):
         aws_access_key_id=session["aws_access_key_id"],
         aws_secret_access_key=session["aws_secret_access_key"],
         aws_session_token=session.get("aws_session_token"),
-        region_name='eu-west-1'  # Changed from us-east-1
+        region_name='us-east-1'
     )
 
     ec2.stop_instances(InstanceIds=[instance_id])
@@ -197,13 +200,13 @@ def choose_role():
 @app.route("/educator_login", methods=["GET", "POST"])
 def educator_login():
     if session.get("email"):
-        return redirect(url_for("home"))
+        return redirect(url_for("dashboard"))
 
     form = LoginForm()
 
     if form.validate_on_submit():
         try:
-            cognito_client.initiate_auth(
+            cognito_response = cognito_client.initiate_auth(
                 ClientId=COGNITO_CLIENT_ID,
                 AuthFlow="USER_PASSWORD_AUTH",
                 AuthParameters={
@@ -216,6 +219,23 @@ def educator_login():
             session["email"] = form.email.data
             role = get_user_group(form.email.data)
             session["role"] = role
+
+            try:
+                user_response = cognito_client.get_user(
+                    AccessToken=cognito_response['AuthenticationResult']['AccessToken']
+                )
+
+                class_group = None
+                for attr in user_response['UserAttributes']:
+                    if attr['Name'] == 'custom:class_group':
+                        class_group = attr['Value']
+                        break
+
+                session["class_group"] = class_group
+                print(f"DEBUG: Retrieved class group: {class_group}")
+            except Exception as e:
+                print(f"DEBUG: Failed to get class group: {e}")
+                session["class_group"] = None
 
             # EDUCATOR: Use Role ARN to assume role
             if form.aws_role_arn.data:
@@ -255,13 +275,13 @@ def educator_login():
 @app.route("/student_login", methods=["GET", "POST"])
 def student_login():
     if session.get("email"):
-        return redirect(url_for("home"))
+        return redirect(url_for("dashboard"))
 
     form = LoginForm()
 
     if form.validate_on_submit():
         try:
-            cognito_client.initiate_auth(
+            cognito_response = cognito_client.initiate_auth(
                 ClientId=COGNITO_CLIENT_ID,
                 AuthFlow="USER_PASSWORD_AUTH",
                 AuthParameters={
@@ -274,6 +294,21 @@ def student_login():
             session["email"] = form.email.data
             role = get_user_group(form.email.data)
             session["role"] = role
+
+            try:
+                user_response = cognito_client.get_user(
+                    AccessToken=cognito_response['AuthenticationResult']['AccessToken']
+                )
+
+                class_group = None
+                for attr in user_response['UserAttributes']:
+                    if attr['Name'] == 'custom:class_group':
+                        class_group = attr['Value']
+                        break
+
+                session["class_group"] = class_group
+            except Exception as e:
+                session["class_group"] = None
 
             # STUDENT: Use direct AWS Academy credentials
             if form.aws_access_key_id.data and form.aws_secret_access_key.data and form.aws_session_token.data:
@@ -322,8 +357,6 @@ def update_aws_credentials():
 
     if role == "Educator":
         aws_role_arn = request.form.get('aws_role_arn')
-        print(f"DEBUG: Role ARN received: {aws_role_arn}")  # DEBUG
-
         if aws_role_arn:
             try:
                 sts_client = boto3.client("sts")
@@ -337,13 +370,10 @@ def update_aws_credentials():
                 session["aws_secret_access_key"] = credentials["SecretAccessKey"]
                 session["aws_session_token"] = credentials["SessionToken"]
 
-                print(f"DEBUG: Credentials stored in session")  # DEBUG
                 flash("AWS credentials updated.", "success")
             except ClientError as e:
-                print(f"DEBUG: AWS Error: {e}")  # DEBUG
                 flash(f"Error updating AWS credentials: {e.response['Error']['Message']}", "danger")
         else:
-            print("DEBUG: No Role ARN provided")  # DEBUG
             flash("Please enter AWS Role ARN.", "danger")
 
     return redirect(url_for("account"))
@@ -390,12 +420,10 @@ def templates():
 
 @app.route("/launch/<path:template_key>")
 def launch_instance(template_key):
-    print(f"DEBUG: Launching template: {template_key}")
     try:
         s3 = get_s3_client()
         template_obj = s3.get_object(Bucket=TEMPLATES_BUCKET, Key=template_key)
-        template_data = json.loads(template_obj['Body'].read())
-        print(f"DEBUG: AMI ID: {template_data['LaunchTemplateData']['ImageId']}")
+        template_data = json.loads(template_obj["Body"].read())
 
         aws_access_key_id = session.get("aws_access_key_id")
         aws_secret_access_key = session.get("aws_secret_access_key")
@@ -406,40 +434,56 @@ def launch_instance(template_key):
             return redirect(url_for("account"))
 
         ec2 = boto3.client(
-            'ec2',
+            "ec2",
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
             aws_session_token=aws_session_token,
-            region_name='eu-west-1'
+            region_name="us-east-1",
         )
 
-        # Prepare launch parameters
         launch_params = {
-            'ImageId': template_data['LaunchTemplateData']['ImageId'],
-            'InstanceType': template_data['LaunchTemplateData']['InstanceType'],
-            'MinCount': 1,
-            'MaxCount': 1
+            "ImageId": template_data["LaunchTemplateData"]["ImageId"],
+            "InstanceType": template_data["LaunchTemplateData"]["InstanceType"],
+            "MinCount": 1,
+            "MaxCount": 1,
         }
 
-        # Add user data if present
-        user_data = template_data['LaunchTemplateData'].get('UserData', '')
+        user_data = template_data["LaunchTemplateData"].get("UserData", "")
         if user_data:
-            user_data_encoded = base64.b64encode(user_data.encode()).decode()
-            launch_params['UserData'] = user_data_encoded
-            print(f"DEBUG: Added user data to launch")
+            launch_params["UserData"] = base64.b64encode(user_data.encode()).decode()
 
-        print(f"DEBUG: About to launch instance...")
         response = ec2.run_instances(**launch_params)
-
-        instance_id = response['Instances'][0]['InstanceId']
-        print(f"DEBUG: Launched instance: {instance_id}")
+        instance_id = response["Instances"][0]["InstanceId"]
         flash(f"Instance {instance_id} launched successfully!", "success")
 
     except Exception as e:
-        print(f"DEBUG: Launch failed with error: {e}")
         flash("Failed to launch instance", "danger")
 
-    return redirect(url_for('instances'))
+    return redirect(url_for("instances"))
+
+
+@app.route("/connect/<instance_id>")
+def connect_vnc(instance_id):
+    try:
+        aws_access_key_id = session.get("aws_access_key_id")
+        aws_secret_access_key = session.get("aws_secret_access_key")
+        aws_session_token = session.get("aws_session_token")
+
+        ec2 = ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token)
+        response = ec2.describe_instances(InstanceIds=[instance_id])
+        instance = response['Reservations'][0]['Instances'][0]
+
+        public_ip = instance.get('PublicIpAddress')
+        if not public_ip:
+            flash("Instance has no public IP address", "warning")
+            return redirect(url_for('instances'))
+
+        # redirect to Guacamole login but later ill make this so it redirects to the gui of the instance
+        return redirect("http://localhost:8080/guacamole")
+
+    except Exception as e:
+        flash("Failed to connect to instance", "danger")
+        return redirect(url_for('instances'))
 
 
 @app.route("/templateupload", methods=["GET", "POST"])
@@ -492,13 +536,10 @@ def template_upload():
                 Body=json.dumps(template_data, indent=2),
                 ContentType='application/json'
             )
-
-            print("DEBUG: S3 upload successful!")
             flash("Template uploaded successfully", "success")
             return redirect(url_for('templates'))
 
         except Exception as e:
-            print(f"DEBUG: S3 upload failed: {e}")
             flash("Upload failed", "danger")
 
     return render_template("template_upload.html")
