@@ -123,3 +123,13 @@ https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-publi
 JSON Handling
 
 https://docs.python.org/3/library/json.html
+
+Apache Guacamole 
+https://guacamole.apache.org/
+https://github.com/boschkundendienst/guacamole-docker-compose
+
+Docker 
+https://docs.docker.com/compose/gettingstarted/
+https://docs.docker.com/get-started/docker-overview/
+
+
