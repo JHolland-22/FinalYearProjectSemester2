@@ -50,3 +50,9 @@ def get_s3_client():
         )
     else:
         return boto3.client('s3')
+
+
+def get_s3_read_client():
+    from botocore import UNSIGNED
+    from botocore.config import Config
+    return boto3.client('s3', config=Config(signature_version=UNSIGNED), region_name='us-east-1')

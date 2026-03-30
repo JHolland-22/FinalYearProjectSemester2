@@ -11,16 +11,16 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 
     {% if title %}
-        <title>Final Year Project - {{ title }}</title>
+        <title>LearnSec - {{ title }}</title>
     {% else %}
-        <title>Final Year Project</title>
+        <title>LearnSec</title>
     {% endif %}
 </head>
 <body>
     <header class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
             <div class="container">
-                <a class="navbar-brand mr-4" href="/">Final Year Project</a>
+                <a class="navbar-brand mr-4" href="/">LearnSec</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
                         aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -34,11 +34,10 @@
                             <a class="nav-item nav-link" href="/instances">My Instances</a>
                             <a class="nav-item nav-link" href="/labs">Labs Available</a>
                             <a class="nav-item nav-link" href="/templates">Templates Available</a>
-
                             {% if session.get('role') == 'Educator' %}
                                 <a class="nav-item nav-link" href="/labsupload">Lab Upload</a>
-                                <a class="nav-item nav-link" href="/templateupload">Template Upload</a>
                             {% endif %}
+                            <a class="nav-item nav-link" href="/templateupload">Template Upload</a>
                         {% endif %}
                     </div>
                     <div class="navbar-nav">
@@ -55,12 +54,10 @@
         </nav>
     </header>
 
-    <main role="main" class="container" style="margin-top: 80px;">
+    <main role="main" class="container-fluid" style="margin-top: 80px; padding: 0 30px;">
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 {% block content %}{% endblock %}
-            </div>
-            <div class="col-md-4">
             </div>
         </div>
     </main>
