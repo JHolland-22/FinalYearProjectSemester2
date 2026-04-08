@@ -123,3 +123,21 @@ https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-publi
 JSON Handling
 
 https://docs.python.org/3/library/json.html
+
+Dashboard Design
+
+https://getbootstrap.com/docs/5.3/components/card/
+https://docs.python.org/3/library/datetime.html
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime
+https://developer.mozilla.org/en-US/docs/Web/API/Window/setInterval
+
+
+Apache Guacamole 
+
+https://github.com/boschkundendienst/guacamole-docker-compose
+https://guacamole.apache.org/doc/gug/configuring-guacamole.html#vnc
+https://github.com/ridvanaltun/guacamole-rest-api-documentation/blob/master/docs/AUTHENTICATION.md
+https://github.com/ridvanaltun/guacamole-rest-api-documentation/blob/master/docs/CONNECTIONS.md
+https://gist.github.com/atomlab/376901845c3d474d1e60e6b7a3affaae
+https://requests.readthedocs.io/en/latest/user/quickstart/
+https://flask.palletsprojects.com/en/stable/quickstart/#redirects-and-errors
