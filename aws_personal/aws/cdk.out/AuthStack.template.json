@@ -212,7 +212,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "29e5c41641068a10617720f724a1a8c343b2d10d3bdf7f6318e1954406b30c6f.zip"
+     "S3Key": "c5e9703d927848cac16b1c3e8907f31d2757cba759d7c1cd526bdd69dec7cd0b.zip"
     },
     "Handler": "index.handler",
     "Role": {
@@ -229,7 +229,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "AuthStack/PostConfirmationLambda/Resource",
-    "aws:asset:path": "asset.29e5c41641068a10617720f724a1a8c343b2d10d3bdf7f6318e1954406b30c6f",
+    "aws:asset:path": "asset.c5e9703d927848cac16b1c3e8907f31d2757cba759d7c1cd526bdd69dec7cd0b",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

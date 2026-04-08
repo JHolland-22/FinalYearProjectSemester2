@@ -34,7 +34,7 @@ class RegistrationForm(FlaskForm):
         validators=[DataRequired(), EqualTo('password')]
     )
     submit = SubmitField('Sign Up')
-    role = None  # Will be determined based on email prefix
+    role = None
 
     def validate_email(self, email):
         allowed_domains = ['gmail.com', 'setu.ie', 'mail.wit.ie']
@@ -60,15 +60,9 @@ class ConfirmForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-
-    # For Educators - Role ARN
-    aws_role_arn = StringField('AWS Role ARN')
-
-    # For Students - Direct credentials from AWS Academy
     aws_access_key_id = StringField('AWS Access Key ID')
-    aws_secret_access_key = StringField('AWS Secret Access Key')
+    aws_secret_access_key = PasswordField('AWS Secret Access Key')
     aws_session_token = TextAreaField('AWS Session Token')
-
     submit = SubmitField('Login')
 
 
