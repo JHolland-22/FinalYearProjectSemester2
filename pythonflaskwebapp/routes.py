@@ -764,7 +764,7 @@ def template_upload():
         instance_type = request.form.get('instance_type')
         description = request.form.get('description', '')
         share_with = request.form.get('share_with')
-        user_data = request.form.get('user_data', '')
+        user_data = request.form.get('user_data')
 
         print(f"DEBUG: Got form data - name:'{template_name}', ami:'{ami_id}'")
 
@@ -777,8 +777,8 @@ def template_upload():
             flash("Please enter an AMI ID", "danger")
             return redirect(request.url)
 
-        if not description or description == '':
-            flash("Please enter a description", "danger")
+        if not user_data or user_data == '':
+            flash("Please enter a user data", "danger")
             return redirect(request.url)
 
         try:
@@ -794,9 +794,9 @@ def template_upload():
                 "ClassGroup": share_with
             }
 
-            # Add user data if provided (optional)
-            if user_data:
-                template_data["LaunchTemplateData"]["UserData"] = user_data
+            # Add description if provided (optional)
+            if description:
+                template_data["LaunchTemplateData"]["Description"] = description
 
             # Use template name as the S3 file key
             filename = f"{template_name}.json"
