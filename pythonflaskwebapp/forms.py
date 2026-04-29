@@ -38,7 +38,7 @@ class RegistrationForm(FlaskForm):
         'Password',
         validators=[DataRequired()]
     )
-    # Re-enter password has to be the same as the one entered in already
+    # Re enter password has to be the same as the one entered in already
     confirm_password = PasswordField(
         'Confirm Password',
         validators=[DataRequired(), EqualTo('password')]
@@ -47,7 +47,7 @@ class RegistrationForm(FlaskForm):
     # Role is set based on email format
     role = None
 
-    # Custom validation for email - to make sure it's the right institutions emails and for student and educator
+    # Custom validation for email to make sure it's the right institutions emails and for student and educator
     def validate_email(self, email):
         allowed_domains = ['gmail.com', 'setu.ie', 'mail.wit.ie']
         # Split email into prefix and domain
@@ -57,11 +57,11 @@ class RegistrationForm(FlaskForm):
         if domain not in allowed_domains:
             raise ValidationError('Email must be a valid college email (@setu.ie or @mail.wit.ie)')
 
-        # If prefix is only numbers → student
+        # If prefix is only numbers = student
         if re.fullmatch(r'\d+', identifier):
             self.role = 'student'
 
-        # If prefix is letters (or dots) → educator
+        # If prefix is letters or dots = educator
         elif re.fullmatch(r'[a-zA-Z.]+', identifier):
             self.role = 'educator'
         # Anything else is invalid
@@ -96,13 +96,8 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
 
-    # AWS credentials provided by user (used for EC2/S3 access)
+    # AWS credentials provided by user used for EC2/S3 access
     aws_access_key_id = StringField('AWS Access Key ID')
     aws_secret_access_key = PasswordField('AWS Secret Access Key')
     aws_session_token = TextAreaField('AWS Session Token')
     submit = SubmitField('Login')
-
-
-
-
-

@@ -29,21 +29,21 @@ ec2 = boto3.client("ec2", region_name="us-east-1")
 
 
 
-# Adds a lab activity entry to the session history (used on the dashboard to show recently viewed/launched labs)
+# Adds a lab activity entry to the session history used on the dashboard to show recently viewed/launched labs
 def log_recent_activity(name):
     recent = session.get('recent_labs', [])
     recent.insert(0, {
         'name': name,
         'time': datetime.now().strftime('%d/%m/%Y %H:%M')
     })
-    session['recent_labs'] = recent[:5] # Keeps only the 5 most recent entries so the session doesn't grow indefinitely
+    session['recent_labs'] = recent[:5] # Keeps only the 5 most recent entries so the session doesnt grow forever
     session.modified = True
 
 
 
-# Main dashboard route — accessible via both "/" and "/dashboard"
-# Redirects to role selection if the user isn't logged in
-# If AWS credentials are in the session, fetches the user's EC2 instances and counts their states
+# Main dashboard route accessible via both / and /dashboard
+# Redirects to role selection if the user isnt logged in
+# If AWS credentials are in the session fetches the users EC2 instances and counts their states
 # Also pulls recent lab activity from the session to display on the dashboard
 @app.route("/")
 @app.route("/dashboard")
@@ -114,8 +114,8 @@ def about():
 
 
 
-# Fetches and displays all EC2 instances for the logged-in user
-# Requires a valid session and AWS credentials, redirects if either are missing
+# Fetches and displays all EC2 instances for the logged in user
+# Requires a valid session and AWS credentials redirects if either are missing
 @app.route("/instances")
 def instances():
     if "email" not in session:
@@ -138,7 +138,7 @@ def instances():
         response = ec2.describe_instances()
         instances = []
 
-        # AWS groups instances inside Reservations, so both loops are needed to reach each instance
+        # AWS groups instances inside Reservations so both loops are needed to reach each instance
         for reservation in response['Reservations']:
             for instance in reservation['Instances']:
                 name = "Unnamed"
@@ -158,7 +158,7 @@ def instances():
         return render_template("instances.html", instances=instances)
 
     except:
-        # If the EC2 call fails, render the page with an empty list rather than crashing
+        # If the EC2 call fails render the page with an empty list rather than crashing
         return render_template("instances.html", instances=[])
 
 
@@ -168,7 +168,7 @@ def instances():
 
 
 
-# Starts a stopped EC2 instance by ID, then redirects back to the instances page
+# Starts a stopped EC2 instance by ID then redirects back to the instances page
 @app.route("/start_instance/<instance_id>")
 def start_instance(instance_id):
     if "email" not in session:
@@ -194,7 +194,7 @@ def start_instance(instance_id):
 
 
 
-# Stops a running EC2 instance by ID, then redirects back to the instances page
+# Stops a running EC2 instance by ID then redirects back to the instances page
 @app.route("/stop_instance/<instance_id>")
 def stop_instance(instance_id):
     if "email" not in session:
@@ -220,7 +220,7 @@ def stop_instance(instance_id):
 
 
 # Handles new user registration via AWS Cognito
-# Automatically assigns a role based on email format, numeric prefix = Student, anything else = Educator
+# Automatically assigns a role based on email format numeric prefix = Student anything else = Educator
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # Redirect logged-in users to dashboard
@@ -269,17 +269,17 @@ def register():
 
 
 # Handles email confirmation after registration using the code Cognito sends to the user
-# Pre-fills the email field when an email address is passed in from the register page
+# Prefills the email field when an email address is passed in from the register page
 @app.route("/confirm", methods=["GET", "POST"])
 def confirm():
     form = ConfirmForm()
     if request.method == "GET":
-        # Pre-fill the email field using the value passed in the URL
+        # Prefill the email field using the value passed in the URL
         form.email.data = request.args.get("email")
 
     if form.validate_on_submit():
         if form.resend.data:
-            # User clicked resend, request a new confirmation code from Cognito
+            # User clicked resend request a new confirmation code from Cognito
             try:
                 cognito_client.resend_confirmation_code(
                     ClientId=COGNITO_CLIENT_ID,
@@ -301,7 +301,7 @@ def confirm():
             flash(f"Confirmation failed: {e}", "danger")
             return render_template("confirm.html", form=form)
 
-        # After successful confirmation, send the user to the login page with the email carried over
+        # After successful confirmation send the user to the login page with the email carried over
         return redirect(url_for("choose_role", email=form.email.data))
 
     return render_template("confirm.html", form=form)
@@ -356,7 +356,7 @@ def educator_login():
             session["role"] = "Educator"
 
             try:
-                # Retrieve additional user attributes (e.g. class group) from Cognito
+                # Retrieve additional user attributes class group from Cognito
                 user_response = cognito_client.get_user(
                     AccessToken=cognito_response['AuthenticationResult']['AccessToken']
                 )
@@ -370,7 +370,7 @@ def educator_login():
                 session["class_group"] = class_group
             except Exception as e:
 
-                # If attribute retrieval fails, continue without class group
+                # If attribute retrieval fails continue without class group
                 session["class_group"] = None
 
             # Store AWS Academy credentials if all fields are provided
@@ -487,7 +487,7 @@ def logout():
 
 
 
-# Displays the account page for the logged-in user
+# Displays the account page for the logged in user
 # Redirects to login if no active session exists
 @app.route("/account", methods=["GET"])
 def account():
@@ -564,7 +564,7 @@ def templates():
                         template_data = json.loads(template_obj['Body'].read())
                         template_class_group = template_data.get('ClassGroup')
 
-                        # Allow access if educator, matching class group, or marked as "All"
+                        # Allow access if educator, matching class group, or marked as All
                         if is_educator or template_class_group == user_class_group or template_class_group == "All":
 
                             # Extract clean template name from S3 key
@@ -637,10 +637,10 @@ def launch_instance(template_key):
             "MaxCount": 1,
         }
 
-        # EC2 requires UserData to be base64 encoded
+        # Boto3 automatically base64 encodes UserData, so pass the raw script string
         user_data = template_data["LaunchTemplateData"].get("UserData", "")
         if user_data:
-            launch_params["UserData"] = base64.b64encode(user_data.encode()).decode()
+            launch_params["UserData"] = user_data
 
         # Launch the EC2 instance
         response = ec2.run_instances(**launch_params)
@@ -650,7 +650,7 @@ def launch_instance(template_key):
             ec2.create_tags(Resources=[instance_id],
                             Tags=[{"Key": "Name", "Value": template_data["LaunchTemplateName"]}])
         except:
-            # Tagging is optional, continue if it fails
+            # Tagging is optional continue if it fails
             pass
 
         # Record activity for dashboard display
@@ -676,7 +676,7 @@ def launch_instance(template_key):
 
 
 # Creates a Guacamole VNC connection for the selected EC2 instance
-# Looks up the instance public IP, registers a connection in Guacamole, then redirects the user to the remote session
+# Looks up the instance public IP registers a connection in Guacamole then redirects the user to the remote session
 @app.route("/connect/<instance_id>")
 def connect_vnc(instance_id):
     try:
@@ -736,7 +736,7 @@ def connect_vnc(instance_id):
         # Guacamole expects the client ID in base64 format: "connection_id\\0c\\0postgresql"
         client_id = base64.b64encode(f"{conn_id}\0c\0postgresql".encode()).decode()
 
-        # Extract server IP (removes Flask port) and redirect to Guacamole client using client_id (connection) and token (authentication)
+        # Extract server IP removes Flask port and redirect to Guacamole client using client_id connection and token authentication
         server_ip = request.host.split(":")[0]
         return redirect(f"http://{server_ip}:8080/guacamole/#/client/{client_id}?token={token}")
 
@@ -754,7 +754,7 @@ def connect_vnc(instance_id):
 
 
 # Handles creation and upload of launch templates to S3
-# Validates form input, builds template JSON, and stores it for later instance launches
+# Validates form input builds template JSON and stores it for later instance launches
 @app.route("/templateupload", methods=["GET", "POST"])
 def template_upload():
     if request.method == "POST":
@@ -794,7 +794,7 @@ def template_upload():
                 "ClassGroup": share_with
             }
 
-            # Add description if provided (optional)
+            # Add description if provided optional
             if description:
                 template_data["LaunchTemplateData"]["Description"] = description
 
@@ -830,7 +830,7 @@ def template_upload():
 
 
 # Allows educators to edit existing launch templates stored in S3
-# Loads template data into a form (GET) and updates it in S3 (POST)
+# Loads template data into a form GET and updates it in S3 POST
 @app.route("/edit_template/<path:template_key>", methods=["GET", "POST"])
 def edit_template(template_key):
     # Restrict access to educators only
@@ -845,7 +845,7 @@ def edit_template(template_key):
             template_obj = s3.get_object(Bucket=TEMPLATES_BUCKET, Key=template_key)
             template_data = json.loads(template_obj['Body'].read())
 
-            # Pre-fill form fields with existing template values
+            # Prefill form fields with existing template values
             form_data = {
                 'template_name': template_data['LaunchTemplateName'],
                 'ami_id': template_data['LaunchTemplateData']['ImageId'],
@@ -863,7 +863,7 @@ def edit_template(template_key):
             flash("Could not load template", "danger")
             return redirect(url_for("templates"))
 
-    # POST - Update template (same logic as template_upload but save to existing key)
+    # POST Update template same logic as template_upload but save to existing key
     template_name = request.form.get('template_name')
     ami_id = request.form.get('ami_id')
     instance_type = request.form.get('instance_type')
@@ -951,7 +951,7 @@ def delete_template(template_key):
 # Each category corresponds to a folder prefix in the S3 bucket
 @app.route("/labs")
 def labs():
-    categories = ["Networking", "Databases", "Security", "Machine Learning"]
+    categories = ["Networking", "Databases", "Security"]
     labs_by_category = {}
 
     try:
@@ -965,7 +965,7 @@ def labs():
             labs = []
             if 'Contents' in response:
                 for obj in response['Contents']:
-                    # Skip S3 folder placeholders (keys ending with '/'), only include actual lab files
+                    # Skip S3 folder placeholders keys ending with '/', only include actual lab files
                     if not obj['Key'].endswith('/'):
                         # Extract lab file name from S3 key
                         name = obj['Key'].split('/')[-1]
@@ -1001,7 +1001,7 @@ def labs():
 # Files are stored using category-based prefixes for organisation
 @app.route("/labsupload", methods=["GET", "POST"])
 def lab_upload():
-    categories = ["Networking", "Databases", "Security", "Machine Learning"]
+    categories = ["Networking", "Databases", "Security"]
 
     if request.method == "POST":
         # Get uploaded file and selected category from the form
@@ -1059,7 +1059,7 @@ def view_lab(lab_key):
                 'Bucket': LABS_BUCKET,
                 'Key': lab_key,
                 'ResponseContentDisposition': 'inline',  # This makes it open in browser
-                'ResponseContentType': 'application/pdf'  # This tells browser it's a PDF
+                'ResponseContentType': 'application/pdf'  # This tells browser its a PDF
             },
             ExpiresIn=3600 # URL expires after 1 hour
         )

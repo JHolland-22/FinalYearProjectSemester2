@@ -15,9 +15,9 @@
      ]
     },
     "PublicAccessBlockConfiguration": {
-     "BlockPublicAcls": true,
+     "BlockPublicAcls": false,
      "BlockPublicPolicy": false,
-     "IgnorePublicAcls": true,
+     "IgnorePublicAcls": false,
      "RestrictPublicBuckets": false
     },
     "Tags": [
@@ -115,6 +115,41 @@
         }
        ],
        "Sid": "PublicReadForEducation"
+      },
+      {
+       "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:DeleteObject"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TemplatesBucketB07CED20",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "TemplatesBucketB07CED20",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ],
+       "Sid": "AllowAnyAccount"
       }
      ],
      "Version": "2012-10-17"

@@ -3,7 +3,7 @@ from flask import session
 
 
 # Creates an EC2 client using AWS credentials stored in the session
-# Used for actions like launching, starting, stopping, and describing instances
+# Used for actions like launching starting stopping and describing instances
 def ec2_client_from_session(aws_access_key_id, aws_secret_access_key, aws_session_token, region="us-east-1"):
     return boto3.client(
         "ec2",
@@ -33,7 +33,7 @@ def get_s3_client():
 
 
 
-# Creates a read-only S3 client that does not require signed credentials
+# Creates a read only S3 client that does not require signed credentials
 # Used for accessing objects where authentication is not required
 def get_s3_read_client():
     from botocore import UNSIGNED

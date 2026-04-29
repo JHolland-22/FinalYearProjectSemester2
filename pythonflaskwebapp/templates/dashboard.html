@@ -128,25 +128,32 @@
 </div>
 
 <script>
+// Session timer - tracks the 4 hour AWS Academy credential expiry window
+// Login time is pulled from the Flask session and used to calculate remaining time
 const loginTime = new Date("{{ session.get('login_time') }}").getTime();
 const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
+// Update the countdown timer every second
 const timerInterval = setInterval(function() {
     const now = new Date().getTime();
     const elapsed = now - loginTime;
     const remaining = FOUR_HOURS - elapsed;
 
     if (remaining > 0) {
+        // Calculate hours, minutes, and seconds from the remaining milliseconds
         const hours = Math.floor(remaining / (1000 * 60 * 60));
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
+        // Format the display as H:MM:SS
         const display = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         document.getElementById('timer-display').textContent = display;
 
         const timerElement = document.getElementById('timer-display');
         const statusElement = document.getElementById('timer-status');
 
+        // Change the timer colour based on how much time is left
+        // Green when more than 2 hours remain yellow under 2 hours red under 1 hour
         if (remaining > 2 * 60 * 60 * 1000) {
             timerElement.className = 'display-4 mb-3 text-success';
             statusElement.textContent = 'Session Active';
@@ -161,6 +168,7 @@ const timerInterval = setInterval(function() {
             statusElement.className = 'mb-3 text-danger';
         }
     } else {
+        // Session has expired stop the timer and prompt user to refresh credentials
         document.getElementById('timer-display').textContent = 'EXPIRED';
         document.getElementById('timer-display').className = 'display-4 mb-3 text-danger';
         document.getElementById('timer-status').textContent = 'Please refresh your credentials';
@@ -169,6 +177,7 @@ const timerInterval = setInterval(function() {
     }
 }, 1000);
 
+// Display the login time in the users local format
 const loginDate = new Date("{{ session.get('login_time') }}");
 document.getElementById('login-time').textContent = loginDate.toLocaleString();
 </script>
