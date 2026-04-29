@@ -22,13 +22,14 @@
                 {{ form.password(class="form-control form-control-lg") }}
             {% endif %}
 
-            {{ form.aws_role_arn.label(class="form-control-label") }}
-            {% if form.aws_role_arn.errors %}
-                {{ form.aws_role_arn(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">{% for error in form.aws_role_arn.errors %}<span>{{ error }}</span>{% endfor %}</div>
-            {% else %}
-                {{ form.aws_role_arn(class="form-control form-control-lg") }}
-            {% endif %}
+            {{ form.aws_access_key_id.label(class="form-control-label") }}
+            {{ form.aws_access_key_id(class="form-control form-control-lg") }}
+
+            {{ form.aws_secret_access_key.label(class="form-control-label") }}
+            {{ form.aws_secret_access_key(class="form-control form-control-lg") }}
+
+            {{ form.aws_session_token.label(class="form-control-label") }}
+            {{ form.aws_session_token(class="form-control form-control-lg") }}
 
         </fieldset>
 

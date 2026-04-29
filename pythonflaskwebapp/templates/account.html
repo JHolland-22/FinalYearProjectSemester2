@@ -7,17 +7,6 @@
   <!-- AWS Credentials -->
   <div class="mt-4">
       <h3>AWS Credentials</h3>
-
-      {% if session.role == "Educator" %}
-      <form method="POST" action="{{ url_for('update_aws_credentials') }}">
-          <div class="form-group">
-              <label class="form-control-label" for="aws_role_arn">AWS Role ARN</label>
-              <input class="form-control" id="aws_role_arn" name="aws_role_arn" type="text" placeholder="arn:aws:iam::123456789012:role/YourRole">
-          </div>
-          <button class="btn btn-success" type="submit">Update Role</button>
-      </form>
-
-      {% elif session.role == "Student" %}
       <form method="POST" action="{{ url_for('update_aws_credentials') }}">
           <div class="form-group">
               <label class="form-control-label" for="aws_access_key_id">Access Key ID</label>
@@ -33,7 +22,6 @@
           </div>
           <button class="btn btn-success" type="submit">Update Credentials</button>
       </form>
-      {% endif %}
   </div>
 </div>
 {% endblock content %}

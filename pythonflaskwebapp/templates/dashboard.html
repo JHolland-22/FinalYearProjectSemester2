@@ -9,32 +9,26 @@
         </div>
     </div>
 
-    <!-- AWS Academy Timer Card -->
     <div class="row">
-        <div class="col-md-6">
-            <div class="card">
+        <!-- AWS Academy Timer Card -->
+        <div class="col-md-4">
+            <div class="card mb-3">
                 <div class="card-header">
-                    <h5 class="card-title">AWS Academy Session Timer</h5>
+                    <h5 class="card-title mb-0">AWS Academy Session Timer</h5>
                 </div>
                 <div class="card-body text-center">
-                    <div id="timer-display" class="display-4 mb-3">
-                        Loading...
-                    </div>
-                    <div id="timer-status" class="mb-3">
-                        Session Active
-                    </div>
-                    <a href="{{ url_for('account') }}" class="btn btn-primary">
-                        Refresh Credentials
-                    </a>
+                    <div id="timer-display" class="display-4 mb-3">Loading...</div>
+                    <div id="timer-status" class="mb-3">Session Active</div>
+                    <a href="{{ url_for('account') }}" class="btn btn-primary btn-sm">Refresh Credentials</a>
                 </div>
             </div>
         </div>
 
         <!-- Quick Stats Card -->
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="card mb-3">
                 <div class="card-header">
-                    <h5 class="card-title">Quick Stats</h5>
+                    <h5 class="card-title mb-0">Quick Stats</h5>
                 </div>
                 <div class="card-body">
                     <p>Role: <span class="badge bg-info">{{ session.get('role') }}</span></p>
@@ -43,57 +37,147 @@
                 </div>
             </div>
         </div>
+
+        <!-- Instance Overview Card -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Instance Overview</h5>
+                </div>
+                <div class="card-body">
+                    <p>Total Instances: <strong>{{ total_instances }}</strong></p>
+                    <p><span class="badge bg-success">Running: {{ running_count }}</span></p>
+                    <p><span class="badge bg-secondary">Stopped: {{ stopped_count }}</span></p>
+                    <a href="{{ url_for('instances') }}" class="btn btn-outline-info btn-sm">View All Instances</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- My Instances Card -->
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">My Instances</h5>
+                </div>
+                <div class="card-body">
+                    {% if instances %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>State</th>
+                                <th>Launched</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for instance in instances %}
+                            <tr>
+                                <td>{{ instance.name }}</td>
+                                <td>{{ instance.type }}</td>
+                                <td>
+                                    {% if instance.state == 'running' %}
+                                        <span class="badge bg-success">Running</span>
+                                    {% elif instance.state == 'stopped' %}
+                                        <span class="badge bg-secondary">Stopped</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">{{ instance.state }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ instance.launch_time }}</td>
+                                <td>
+                                    {% if instance.state == 'running' %}
+                                        <a href="/connect/{{ instance.id }}" class="btn btn-success btn-sm">Connect</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted">No instances found. Add your AWS credentials in Account settings or launch a template.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Card -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_labs %}
+                        {% for lab in recent_labs %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <strong>{{ lab.name }}</strong>
+                            <br><small class="text-muted">Opened: {{ lab.time }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No recent activity yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-// JavaScript timer functionality
+// Session timer - tracks the 4 hour AWS Academy credential expiry window
+// Login time is pulled from the Flask session and used to calculate remaining time
 const loginTime = new Date("{{ session.get('login_time') }}").getTime();
-const FOUR_HOURS = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
-// Update timer every second
+// Update the countdown timer every second
 const timerInterval = setInterval(function() {
     const now = new Date().getTime();
     const elapsed = now - loginTime;
     const remaining = FOUR_HOURS - elapsed;
-    
+
     if (remaining > 0) {
-        // Calculate hours, minutes, seconds
+        // Calculate hours, minutes, and seconds from the remaining milliseconds
         const hours = Math.floor(remaining / (1000 * 60 * 60));
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-        
+
+        // Format the display as H:MM:SS
         const display = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         document.getElementById('timer-display').textContent = display;
-        
-        // Color changes based on time remaining
+
         const timerElement = document.getElementById('timer-display');
         const statusElement = document.getElementById('timer-status');
-        
-        if (remaining > 2 * 60 * 60 * 1000) { // > 2 hours
+
+        // Change the timer colour based on how much time is left
+        // Green when more than 2 hours remain yellow under 2 hours red under 1 hour
+        if (remaining > 2 * 60 * 60 * 1000) {
             timerElement.className = 'display-4 mb-3 text-success';
             statusElement.textContent = 'Session Active';
             statusElement.className = 'mb-3 text-success';
-        } else if (remaining > 1 * 60 * 60 * 1000) { // 1-2 hours
+        } else if (remaining > 1 * 60 * 60 * 1000) {
             timerElement.className = 'display-4 mb-3 text-warning';
             statusElement.textContent = 'Session Warning';
             statusElement.className = 'mb-3 text-warning';
-        } else { // < 1 hour
+        } else {
             timerElement.className = 'display-4 mb-3 text-danger';
             statusElement.textContent = 'Session Expiring Soon!';
             statusElement.className = 'mb-3 text-danger';
         }
     } else {
-        // Session expired
+        // Session has expired stop the timer and prompt user to refresh credentials
         document.getElementById('timer-display').textContent = 'EXPIRED';
         document.getElementById('timer-display').className = 'display-4 mb-3 text-danger';
         document.getElementById('timer-status').textContent = 'Please refresh your credentials';
         document.getElementById('timer-status').className = 'mb-3 text-danger';
         clearInterval(timerInterval);
     }
-}, 1000); // Update every second
+}, 1000);
 
-// Display formatted login time
+// Display the login time in the users local format
 const loginDate = new Date("{{ session.get('login_time') }}");
 document.getElementById('login-time').textContent = loginDate.toLocaleString();
 </script>

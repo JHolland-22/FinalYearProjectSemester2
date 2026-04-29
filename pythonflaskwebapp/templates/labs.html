@@ -41,8 +41,10 @@
     </div>
     {% endfor %}
 </div>
-
 <script>
+// Filters the lab sections on the labs page by category
+// Triggered when the user selects a category from the dropdown
+// Shows all sections if no filter is selected otherwise only shows the matching category
 function filterLabs() {
     var filter = document.getElementById('category_filter').value;
     var sections = document.querySelectorAll('.category-section');
@@ -56,5 +58,4 @@ function filterLabs() {
     }
 }
 </script>
-
 {% endblock %}
